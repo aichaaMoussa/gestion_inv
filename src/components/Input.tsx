@@ -1,0 +1,60 @@
+import { ChangeEvent, FC } from "react";
+import { UseFormRegister } from "react-hook-form";
+
+interface InputProps {
+  type: "text" | "number" | "email" | "password";
+  id: string;
+  label: string;
+  register: UseFormRegister<any>; // Replace `any` with the actual type of your form data
+  name: string;
+  placeholder: string;
+  error?: { message?: string }; // Error object to display specific messages
+  disabled?: boolean;
+  autofocus?: boolean;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const Input: FC<InputProps> = ({
+  type,
+  id,
+  label,
+  register,
+  name,
+  placeholder,
+  error,
+  disabled,
+  onChange,
+  autofocus = false,
+}) => {
+  return (
+    <div className="input-wrapper">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <input
+        type={type}
+        {...register(name)} // Register the input with react-hook-form
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        onChange={onChange}
+        disabled={disabled}
+        autoFocus={autofocus}
+        aria-invalid={!!error} // ARIA attribute for accessibility
+        aria-describedby={error ? `${id}-error` : undefined}
+        className={`mt-1 block w-full rounded-md border ${
+          error
+            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+        } shadow-sm sm:text-sm`}
+      />
+      {error && (
+        <p id={`${id}-error`} className="mt-1 text-sm text-red-500">
+          {error.message || "Ce champ est requis"}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default Input;
