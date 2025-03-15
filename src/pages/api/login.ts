@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { connectToDb } from "@/lib/mongoose";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 
 if (!JWT_SECRET) {
   throw new Error(

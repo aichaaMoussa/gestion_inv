@@ -1,9 +1,9 @@
 import Table from "@/components/Table";
 import axios from "axios";
+import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { QueryClient, useMutation, useQuery } from "react-query";
-import { isQueryKey } from "react-query/types/core/utils";
 import { toast } from "react-toastify";
 
 const TablePage = () => {
@@ -15,7 +15,7 @@ const TablePage = () => {
     },
 
     onSuccess: () => {
-      QueryClient.invalidateQueries({ QueryKey: ["user"] });
+      QueryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("Role modifié avec succès !");
     },
     onError: () => {
@@ -23,7 +23,7 @@ const TablePage = () => {
     },
   });
 
-  const { mutate: delatMutation } = useMutation({
+  const { mutate: deleteMutation } = useMutation({
     mutationKey: ["role"],
     mutationFn: async (_id) => {
       const response = await axios.delete("/api/user/" + _id);
@@ -31,35 +31,38 @@ const TablePage = () => {
     },
 
     onSuccess: () => {
-      QueryClient.invalidateQueries({ QueryKey: ["user"] });
-      toast.success("Role modifié avec succès !");
+      QueryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.success("Utilisateur supprimé avec succès !");
     },
     onError: () => {
-      toast.error("Erreur lors de la modification du rôle.");
+      toast.error("Erreur lors de la suppression de l'utilisateur.");
     },
   });
+
   const { data } = useQuery(["user"], async () => {
-    const reponse = await axios.get("/api/user", { params: {} });
-    return reponse.data;
+    const response = await axios.get("/api/user");
+    return response.data;
   });
+
   console.log("data", data);
+
   const columns = React.useMemo(
     () => [
       {
-        Header: "Index",
-        accessor: (row, i) => i + 1, // Génère un index automatiquement
+        Header: "Nom",
+        accessor: "nom",
       },
       {
-        Header: "namefr",
-        accessor: "nom", // Correspond à la clé `name` dans les données
-      },
-      {
-        Header: "namear",
+        Header: "Prénom",
         accessor: "prenom",
       },
       {
-        Header: "phone",
+        Header: "Téléphone",
         accessor: "phone",
+      },
+      {
+        Header: "Rôle",
+        accessor: "role",
       },
       {
         Header: "Actions",
@@ -68,14 +71,15 @@ const TablePage = () => {
           <div className="flex space-x-2">
             <Link
               href={`/dashboard/user/add/${row.original._id?.toString() || ""}`}
+              className="text-balck hover:underline"
             >
-              iugu
+              <Pencil size={20} />
             </Link>
             <button
-              onClick={() => delatMutation(row.original._id?.toString())}
-              className="px-3 py-1 bg-red-500 text-white rounded"
+              onClick={() => deleteMutation(row.original._id?.toString())}
+              className="px-3 py-1  text-white rounded"
             >
-              Delete
+              <Trash className="text-black" size={20} />
             </button>
           </div>
         ),
@@ -86,7 +90,14 @@ const TablePage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-semibold mb-4">Tableau avec Pagination</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Gestion des utilisateurs</h1>
+        <Link href="/dashboard/user/add">
+          <button className="w-[146px] h-[47px] bg-sky-800 border-[0.6px] border-[#0281B4] rounded-[2px] font-medium shadow-md hover:bg-[#0281B4] text-white transition">
+            Ajouter
+          </button>
+        </Link>
+      </div>
       <Table columns={columns} data={data?.roles || []} />
     </div>
   );

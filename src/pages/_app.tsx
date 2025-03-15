@@ -1,11 +1,32 @@
+import { SessionProvider, useSession } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { SessionProvider } from "next-auth/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/globals.css";
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login"); // 🔥 Redirection si non authentifié
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Chargement...
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
 
 export default function App({
   Component,
@@ -13,13 +34,6 @@ export default function App({
 }: AppProps) {
   const router = useRouter();
   const queryClient = new QueryClient();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // Vérifiez si l'utilisateur est connecté (ex. via un token)
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-  }, []);
 
   // Pages nécessitant la barre de navigation
   const dashboardPages = [
@@ -27,9 +41,9 @@ export default function App({
     "/dashboard/roles",
     "/dashboard/patients",
   ];
-  const showNavbar =
-    isAuthenticated &&
-    dashboardPages.some((path) => router.pathname.startsWith(path));
+  const showNavbar = dashboardPages.some((path) =>
+    router.pathname.startsWith(path)
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -39,15 +53,14 @@ export default function App({
           messages={pageProps.messages}
           timeZone="Europe/Vienna"
         >
-          <div className="flex h-screen">
-            {/* Barre de navigation */}
-            {showNavbar && <Navbar />}
-
-            {/* Contenu principal */}
-            <main className="flex-1 p-4 bg-gray-100 overflow-y-auto">
-              <Component {...pageProps} />
-            </main>
-          </div>
+          <AuthGuard>
+            <div className="flex h-screen">
+              {showNavbar && <Navbar />}
+              <main className="flex-1 p-4 bg-white overflow-y-auto">
+                <Component {...pageProps} />
+              </main>
+            </div>
+          </AuthGuard>
         </NextIntlClientProvider>
       </SessionProvider>
     </QueryClientProvider>

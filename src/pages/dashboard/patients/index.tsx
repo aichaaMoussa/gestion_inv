@@ -39,9 +39,17 @@ const TablePage = () => {
     },
   });
   const { data } = useQuery(["user"], async () => {
+    const session = await axios.get("/api/auth/session"); // Récupérer la session
+    const userId = session.data?.user?.id; // Extraire l'ID de l'utilisateur connecté
+
+    if (!userId) {
+      throw new Error("Utilisateur non authentifié");
+    }
+
     const response = await axios.get("/api/patients", {
-      params: {},
+      params: { user: userId }, // Envoyer l'ID du médecin
     });
+
     return response.data;
   });
 

@@ -1,43 +1,42 @@
 import React from "react";
 import { useTable, usePagination } from "react-table";
+import { ChevronLeft, ChevronRight } from "lucide-react"; // Icônes pour pagination
 
 const Table = ({ columns, data }) => {
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
     prepareRow,
-    page, // Les lignes pour la page actuelle
+    page,
     nextPage,
     previousPage,
     canNextPage,
     canPreviousPage,
+    gotoPage,
     pageOptions,
-    state: { pageIndex },
+    setPageSize,
+    state: { pageIndex, pageSize },
   } = useTable(
     {
       columns,
       data,
-      initialState: { pageIndex: 0, pageSize: 5 }, // Nombre de lignes par page
+      initialState: { pageIndex: 0, pageSize: 5 },
     },
-    usePagination // Plugin pour la pagination
+    usePagination
   );
 
   return (
-    <div className="p-4 bg-white shadow rounded-md">
+    <div className="p-4 bg-white rounded-md ">
       {/* Tableau */}
-      <table
-        {...getTableProps()}
-        className="w-full border-collapse border border-gray-200"
-      >
-        <thead className="bg-gray-100">
+      <table {...getTableProps()} className="w-full border-collapse">
+        <thead className="bg-sky-50 border-b-2 border-gray-400">
           {headerGroups.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column) => (
                 <th
                   {...column.getHeaderProps()}
-                  className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700"
+                  className="px-4 py-3 text-left text-sm font-semibold text-gray-700"
                 >
                   {column.render("Header")}
                 </th>
@@ -46,14 +45,17 @@ const Table = ({ columns, data }) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map((row, i) => {
+          {page.map((row) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()} className="hover:bg-gray-50">
+              <tr
+                {...row.getRowProps()}
+                className="border-b border-gray-300 hover:bg-gray-50"
+              >
                 {row.cells.map((cell) => (
                   <td
                     {...cell.getCellProps()}
-                    className="border border-gray-200 px-4 py-2 text-sm text-gray-600"
+                    className="px-4 py-3 text-sm text-gray-600"
                   >
                     {cell.render("Cell")}
                   </td>
@@ -66,23 +68,54 @@ const Table = ({ columns, data }) => {
 
       {/* Pagination */}
       <div className="flex items-center justify-between mt-4">
-        <button
-          onClick={() => previousPage()}
-          disabled={!canPreviousPage}
-          className="px-3 py-1 text-sm bg-blue-500 text-white rounded disabled:bg-gray-300"
-        >
-          Précédent
-        </button>
-        <span className="text-sm">
-          Page <strong>{pageIndex + 1}</strong> sur {pageOptions.length}
-        </span>
-        <button
-          onClick={() => nextPage()}
-          disabled={!canNextPage}
-          className="px-3 py-1 text-sm bg-blue-500 text-white rounded disabled:bg-gray-300"
-        >
-          Suivant
-        </button>
+        {/* Sélecteur du nombre d'éléments */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600">Show rows:</span>
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="p-1 text-sm border rounded"
+          >
+            {[5, 10, 15, 20].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Numérotation */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => previousPage()}
+            disabled={!canPreviousPage}
+            className="p-2 text-gray-600 rounded hover:bg-gray-100 disabled:text-gray-300"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          {pageOptions.map((page, index) => (
+            <button
+              key={index}
+              onClick={() => gotoPage(page)}
+              className={`px-3 py-1 text-sm rounded ${
+                pageIndex === page
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {page + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => nextPage()}
+            disabled={!canNextPage}
+            className="p-2 text-gray-600 rounded hover:bg-gray-100 disabled:text-gray-300"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -19,10 +19,11 @@ export const authOptions = {
           const user = res.data;
 
           if (user && user.token) {
+            console.log("Login Success - User:", user);
             return {
               token: user.token,
               username: credentials.username,
-              id: user.id, // 🔥 Ajoute l'ID ici
+              id: user.id,
             };
           }
           return null;
@@ -33,24 +34,46 @@ export const authOptions = {
       },
     }),
   ],
+
+  session: {
+    strategy: "jwt",
+  },
+
   callbacks: {
     async jwt({ token, user }) {
-      console.log("JWT Callback - Token:", token, "User:", user);
+      console.log(
+        "JWT Callback - Avant Mise à Jour - Token:",
+        token,
+        "User:",
+        user
+      );
       if (user) {
         token.token = user.token;
         token.username = user.username;
-        token.id = user.id || token.id; // 🔥 Vérifie bien que `id` est transmis
+        token.id = user.id;
       }
+      console.log("JWT Callback - Après Mise à Jour - Token:", token);
       return token;
     },
+
     async session({ session, token }) {
-      console.log("Session Callback - Session:", session, "Token:", token);
-      session.user.token = token.token;
-      session.user.username = token.username;
-      session.user.id = token.id || null; // 🔥 Vérifie bien que `id` est transmis
+      console.log(
+        "Session Callback - Avant Mise à Jour - Session:",
+        session,
+        "Token:",
+        token
+      );
+      session.user = {
+        ...session.user,
+        token: token.token,
+        username: token.username,
+        id: token.id,
+      };
+      console.log("Session Callback - Après Mise à Jour - Session:", session);
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
