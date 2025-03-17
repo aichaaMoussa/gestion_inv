@@ -33,21 +33,22 @@ const Input: FC<InputProps> = ({
       </label>
       <input
         type={type}
-        {...register(name)} // Register the input with react-hook-form
+        {...register(name)}
         id={id}
         name={name}
         placeholder={placeholder}
         onChange={onChange}
         disabled={disabled}
         autoFocus={autofocus}
-        aria-invalid={!!error} // ARIA attribute for accessibility
+        aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={`mt-1 block w-full rounded-md border ${
+        className={`mt-1 block w-[360px] h-[47px] rounded-[4px] border border-[0.6px] bg-[#FBFBFB] ${
           error
             ? "border-red-500 focus:ring-red-500 focus:border-red-500"
             : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
         } shadow-sm sm:text-sm`}
       />
+
       {error && (
         <p id={`${id}-error`} className="mt-1 text-sm text-red-500">
           {error.message || "Ce champ est requis"}

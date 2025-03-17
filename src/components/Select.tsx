@@ -52,7 +52,7 @@ const Select: React.FC<SelectProps> = ({
         onChange={handleChange}
         disabled={isDisabled}
         multiple={isMulti}
-        className={`border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+        className={`custom-select border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
           isDisabled ? "bg-gray-100 cursor-not-allowed" : ""
         }`}
       >

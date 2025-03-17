@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import Select from "@/components/Select";
 import Input from "@/components/Input";
+import router from "next/router";
 
 const queryClient = new QueryClient();
 
@@ -59,7 +60,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen ">
         <div className=" p-2 rounded-2xl  max-w-4xl w-full">
           <h1 className="text-2xl font-semibold text-gray-700 mb-6">
             Créer un utilisateur
@@ -104,17 +105,7 @@ export default function App() {
               error={!!errors.phone}
               register={register}
             />
-            <Select
-              id="roleId"
-              options={roleOptions}
-              placeholder={isLoading ? "Loading roles..." : "Select a role"}
-              isDisabled={isLoading || error}
-              onChange={(value) => {
-                setValue("roleId", value);
-                console.log("Role selected:", value);
-              }}
-              errorMessage={errors.roleId?.message}
-            />
+
             <Input
               type="text"
               label="Username"
@@ -133,10 +124,23 @@ export default function App() {
               error={!!errors.password}
               register={register}
             />
+            <Select
+              id="roleId"
+              options={roleOptions}
+              placeholder={isLoading ? "Loading roles..." : "Select a role"}
+              isDisabled={isLoading || error}
+              onChange={(value) => {
+                setValue("roleId", value);
+                console.log("Role selected:", value);
+              }}
+              className=""
+              errorMessage={errors.roleId?.message}
+            />
             <div className="col-span-2 flex justify-end gap-4">
               <button
                 type="button"
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                onClick={() => router.push("/dashboard/user")}
               >
                 Cancel
               </button>
