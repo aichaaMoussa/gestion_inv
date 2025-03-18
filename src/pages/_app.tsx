@@ -6,6 +6,8 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/globals.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -60,6 +62,7 @@ export default function App({
                 <Component {...pageProps} />
               </main>
             </div>
+            <ToastContainer position="bottom-right" autoClose={3000} />
           </AuthGuard>
         </NextIntlClientProvider>
       </SessionProvider>

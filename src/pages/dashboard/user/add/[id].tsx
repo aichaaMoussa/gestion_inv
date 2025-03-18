@@ -42,23 +42,16 @@ export default function UpdateForm() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries("user");
+      toast.success("Utilisateur mis à jour avec succès !");
 
-      // ✅ Stocke le message dans le cache de React Query
-      queryClient.setQueryData(
-        "toastMessage",
-        "L'utilisateur a été mis à jour avec succès !"
-      );
-
-      push("/dashboard/user");
+      setTimeout(() => {
+        push("/dashboard/user");
+      }, 1000); // Attendre 1 seconde pour que le toast s'affiche avant la redirection
     },
-    onError: () => {
-      queryClient.setQueryData(
-        "toastMessage",
-        "Erreur lors de la mise à jour de l'utilisateur."
-      );
 
-      push("/dashboard/user");
+    onError: (error) => {
+      console.error("Erreur lors de la création de l'utilisateur :", error);
+      toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
     },
   });
 

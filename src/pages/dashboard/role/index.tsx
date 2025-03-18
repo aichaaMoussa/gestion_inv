@@ -4,6 +4,8 @@ import Table from "@/components/Table"; // Importez votre composant Table
 import axios from "axios";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
+import Link from "next/link";
+import { Pencil, Trash } from "lucide-react";
 
 const TablePage = () => {
   const { mutate: deleteMutation } = useMutation({
@@ -43,11 +45,17 @@ const TablePage = () => {
         accessor: "actions",
         Cell: ({ row }) => (
           <div className="flex space-x-2">
-            <button
-              onClick={() => deleteMutation(row.original._id)}
-              className="px-3 py-1 bg-red-500 text-white rounded"
+            <Link
+              href={`/dashboard/role/add/${row.original._id?.toString() || ""}`}
+              className="text-balck hover:underline"
             >
-              Supprimer
+              <Pencil size={20} />
+            </Link>
+            <button
+              onClick={() => deleteMutation(row.original._id?.toString())}
+              className="px-3 py-1  text-white rounded"
+            >
+              <Trash className="text-black" size={20} />
             </button>
           </div>
         ),
@@ -57,12 +65,16 @@ const TablePage = () => {
   );
 
   return (
-    <div className=" flex h-screen">
-      {/* Main Content */}
-      <div className="flex-1 p-4">
-        <h1 className="text-2xl font-semibold ">Tableau des Rôles</h1>
-        <Table columns={columns} data={data?.roles || []} />
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Gestion des roles</h1>
+        <Link href="/dashboard/role/add">
+          <button className="w-[146px] h-[47px] bg-sky-800 border-[0.6px] border-[#0281B4] rounded-[2px] font-medium shadow-md hover:bg-[#0281B4] text-white transition">
+            Ajouter
+          </button>
+        </Link>
       </div>
+      <Table columns={columns} data={data?.roles || []} />
     </div>
   );
 };

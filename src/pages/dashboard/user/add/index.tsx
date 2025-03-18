@@ -8,7 +8,8 @@ import {
 import axios from "axios";
 import Select from "@/components/Select";
 import Input from "@/components/Input";
-import router from "next/router";
+import router, { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
 const queryClient = new QueryClient();
 
@@ -20,7 +21,7 @@ export default function App() {
     watch,
     formState: { errors },
   } = useForm();
-
+  const { push } = useRouter();
   const {
     data: roles,
     isLoading,
@@ -33,13 +34,20 @@ export default function App() {
     },
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isLoading: load } = useMutation({
     mutationKey: ["user"],
     mutationFn: async (data) => {
       return axios.post("/api/user", data);
     },
+    onSuccess: () => {
+      push("/dashboard/user"); // ✅ Redirection après succès
+      toast.success("Utilisateur créé avec succès !");
+    },
+    onError: (error) => {
+      console.error("Erreur lors de la création de l'utilisateur :", error);
+      toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
+    },
   });
-
   const roleOptions = roles?.roles
     ? roles.roles.map((role: any) => ({
         value: role._id,

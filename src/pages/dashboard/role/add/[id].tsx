@@ -44,11 +44,12 @@ export default function UpdateForm() {
     },
   });
 
-  // React Hook Form with Zod resolver
-
   const methods = useForm({
     resolver: zodResolver(MedicalHistorySchema),
   });
+  const { setValue, watch, register, formState } = methods;
+  // React Hook Form with Zod resolver
+  const { errors } = formState;
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(MedicalHistorySchema),
   });
@@ -70,36 +71,37 @@ export default function UpdateForm() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Mettre à jour un rôle</h1>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-          <Input
-            type="text"
-            label="Nom en Français"
-            id="namefr"
-            name="namefr"
-            placeholder="Entrez le nom en français"
-            register={methods.register}
-            error={methods.formState.errors.namefr}
-          />
-          <Input
-            type="text"
-            label="Nom en Arabe"
-            id="namear"
-            name="namear"
-            placeholder="Entrez le nom en arabe"
-            register={methods.register}
-            error={methods.formState.errors.namear}
-          />
-
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-            disabled={isLoading}
+      <div className="flex items-center justify-center  ">
+        <div className=" p-2 rounded-2xl  max-w-4xl w-full">
+          <h1 className="text-2xl font-semibold text-gray-700 ">
+            modifier un role
+          </h1>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-2 gap-4"
           >
-            {isLoading ? "Mise à jour..." : "Mettre à jour"}
-          </button>
-        </form>
+            <Input
+              type="text"
+              label="French Name"
+              id="namefr"
+              name="namefr"
+              placeholder="Enter name in French"
+              error={formState.errors.namefr}
+              register={register}
+            />
+            <Input
+              type="text"
+              label="Arabic Name"
+              id="namear"
+              name="namear"
+              placeholder="Enter name in Arabic"
+              error={formState.errors.namear}
+              register={register}
+            />
+
+            <input type="submit" />
+          </form>
+        </div>
       </div>
     </QueryClientProvider>
   );
