@@ -7,21 +7,21 @@ import { QueryClient, useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
 
 const TablePage = () => {
-  const { mutate: updateMutation } = useMutation({
-    mutationKey: ["user"],
-    mutationFn: async (updatedRole) => {
-      const response = await axios.put("/api/user", updatedRole);
-      return response.data;
-    },
+  // const { mutate: updateMutation } = useMutation({
+  //   mutationKey: ["user"],
+  //   mutationFn: async (updatedRole) => {
+  //     const response = await axios.put("/api/user", updatedRole);
+  //     return response.data;
+  //   },
 
-    onSuccess: () => {
-      QueryClient.invalidateQueries({ queryKey: ["user"] });
-      toast.success("Role modifié avec succès !");
-    },
-    onError: () => {
-      toast.error("Erreur lors de la modification du rôle.");
-    },
-  });
+  //   onSuccess: () => {
+  //     QueryClient.invalidateQueries({ queryKey: ["user"] });
+  //     toast.success("Role modifié avec succès !");
+  //   },
+  //   onError: () => {
+  //     toast.error("Erreur lors de la modification du rôle.");
+  //   },
+  // });
 
   const { mutate: deleteMutation } = useMutation({
     mutationKey: ["role"],
@@ -31,11 +31,10 @@ const TablePage = () => {
     },
 
     onSuccess: () => {
-      QueryClient.invalidateQueries({ queryKey: ["user"] });
-      toast.success("Utilisateur supprimé avec succès !");
+      toast.success("user supprimé avec succès !");
     },
     onError: () => {
-      toast.error("Erreur lors de la suppression de l'utilisateur.");
+      toast.error("Erreur lors de la suppression du rôle.");
     },
   });
 

@@ -10,6 +10,8 @@ import Select from "@/components/Select";
 import Input from "@/components/Input";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/router";
 
 const queryClient = new QueryClient();
 
@@ -21,11 +23,19 @@ export default function App() {
     watch,
     formState: { errors },
   } = useForm();
-
+  const { push } = useRouter();
   const { mutate } = useMutation({
     mutationKey: ["user"],
     mutationFn: async (data) => {
       return axios.post("/api/patients", data);
+    },
+    onSuccess: () => {
+      push("/dashboard/patients"); // ✅ Redirection après succès
+      toast.success("Utilisateur créé avec succès !");
+    },
+    onError: (error) => {
+      console.error("Erreur lors de la création de l'utilisateur :", error);
+      toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
     },
   });
 

@@ -42,16 +42,11 @@ export default function UpdateForm() {
       return res.data;
     },
     onSuccess: () => {
-      toast.success("Utilisateur mis à jour avec succès !");
-
-      setTimeout(() => {
-        push("/dashboard/user");
-      }, 1000); // Attendre 1 seconde pour que le toast s'affiche avant la redirection
+      push("/dashboard/user");
+      toast.success("user modifier avec succès !");
     },
-
-    onError: (error) => {
-      console.error("Erreur lors de la création de l'utilisateur :", error);
-      toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
+    onError: () => {
+      toast.error("Erreur lors de la suppression du user.");
     },
   });
 

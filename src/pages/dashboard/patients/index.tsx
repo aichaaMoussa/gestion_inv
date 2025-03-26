@@ -31,13 +31,13 @@ const TablePage = () => {
     },
 
     onSuccess: () => {
-      QueryClient.invalidateQueries({ QueryKey: ["user"] });
-      toast.success("Role modifié avec succès !");
+      toast.success("patients supprimé avec succès !");
     },
     onError: () => {
-      toast.error("Erreur lors de la modification du rôle.");
+      toast.error("Erreur lors de la suppression du patients.");
     },
   });
+
   const { data } = useQuery(["user"], async () => {
     const session = await axios.get("/api/auth/session"); // Récupérer la session
     const userId = session.data?.user?.id; // Extraire l'ID de l'utilisateur connecté
@@ -101,7 +101,14 @@ const TablePage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-semibold mb-4">Tableau avec Pagination</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Gestion des Patients</h1>
+        <Link href="/dashboard/patients/add">
+          <button className="w-[146px] h-[47px] bg-sky-800 border-[0.6px] border-[#0281B4] rounded-[2px] font-medium shadow-md hover:bg-[#0281B4] text-white transition">
+            Ajouter
+          </button>
+        </Link>
+      </div>
       <Table columns={columns} data={data?.roles || []} />
     </div>
   );

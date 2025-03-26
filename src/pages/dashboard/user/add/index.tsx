@@ -21,7 +21,6 @@ export default function App() {
     watch,
     formState: { errors },
   } = useForm();
-  const { push } = useRouter();
   const {
     data: roles,
     isLoading,
@@ -33,6 +32,7 @@ export default function App() {
       return response.data;
     },
   });
+  const { push } = useRouter();
 
   const { mutate, isLoading: load } = useMutation({
     mutationKey: ["user"],
