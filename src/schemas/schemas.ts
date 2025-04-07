@@ -14,8 +14,9 @@ export const PatientSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"), // Prénom du patient
   lastName: z.string().min(1, "Le nom de famille est requis"), // Nom
   nni: z.string().length(10, "Le NNI doit avoir exactement 10 caractères"), // Numéro d'identification nationale
-  // dateOfBirth: z.coerce.date(), // Date de naissance, convertit si nécessaire
-  medicalHistory: z.string().min(1, "Le"),
+  adress: z.string().min(1, "L'adress est requis"),
+  telephone: z.string().min(1, "Le telephone est requis"),
+  age: z.string().min(1),
 });
 export const userShemas = z.object({
   nom: z.string().min(3),

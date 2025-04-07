@@ -89,21 +89,30 @@ export default function App() {
               error={!!errors.nni}
               register={register}
             />
-            {/* <Input
-              type="text"
-              label="Phone"
-              id="phone"
-              name="phone"
-              placeholder="Enter phone"
+             <Input
+              type="number"
+              label="telephone"
+              id="telephone"
+              name="telephone"
+              placeholder="Enter telephone"
               error={!!errors.phone}
               register={register}
-            /> */}
+            /> 
             <Input
               type="text"
-              label="medicamennt"
-              id="medicalHistory"
-              name="medicalHistory"
-              placeholder="Enter medicamennt"
+              label="adress"
+              id="adress"
+              name="adress"
+              placeholder="Enter adress"
+              error={!!errors.nni}
+              register={register}
+            />
+            <Input
+              type="number"
+              label="age"
+              id="age"
+              name="age"
+              placeholder="Enter adress"
               error={!!errors.nni}
               register={register}
             />

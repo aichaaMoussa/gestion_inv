@@ -1,5 +1,6 @@
 import Table from "@/components/Table";
 import axios from "axios";
+import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { QueryClient, useMutation, useQuery } from "react-query";
@@ -56,10 +57,7 @@ const TablePage = () => {
   console.log("data", data);
   const columns = React.useMemo(
     () => [
-      {
-        Header: "Index",
-        accessor: (row, i) => i + 1, // Génère un index automatiquement
-      },
+      
       {
         Header: "nom",
         accessor: "firstName", // Correspond à la clé `name` dans les données
@@ -69,12 +67,18 @@ const TablePage = () => {
         accessor: "lastName",
       },
       {
-        Header: "phone",
-        accessor: "phone",
+        Header: "telephone",
+        accessor: "telephone",
       },
       {
-        Header: "medicalHistory",
-        accessor: "medicalHistory",
+
+        Header: "age",
+        accessor: "age",
+      },
+      
+      {
+        Header: "adress",
+        accessor: "adress",
       },
       {
         Header: "Actions",
@@ -82,17 +86,18 @@ const TablePage = () => {
         Cell: ({ row }) => (
           <div className="flex space-x-2">
             <Link
-              href={`/dashboard/user/add/${row.original._id?.toString() || ""}`}
+              href={`/dashboard/patients/add/${row.original._id?.toString() || ""}`}
             >
-              iugu
+              <Pencil size={20} />
             </Link>
             <button
               onClick={() => delatMutation(row.original._id?.toString())}
-              className="px-3 py-1 bg-red-500 text-white rounded"
+              className="px-3 py-1  text-white rounded"
             >
-              Delete
+               <Trash className="text-black" size={20} />
             </button>
           </div>
+          
         ),
       },
     ],
