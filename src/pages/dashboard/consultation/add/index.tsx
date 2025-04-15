@@ -1,34 +1,109 @@
 "use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { consultationSchema, ConsultationFormData } from "@/schemas/consultation";
-
+import {
+  consultationSchema,
+  ConsultationFormData,
+} from "@/schemas/consultation";
+import { useQuery, useMutation } from "react-query";
+import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/router";
+
+interface Patient {
+  _id: string;
+  telephone: string;
+  firstName: string;
+}
+
+interface SessionUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
 
 export default function AddConsultationPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: patients, isLoading } = useQuery(["patients"], async () => {
+    if (!session?.user) {
+      throw new Error("Utilisateur non authentifié");
+    }
+    const user = session.user as SessionUser;
+    const response = await axios.get(`/api/patients?user=${user.id}`);
+    return response.data.roles;
+  });
+  console.log("data", patients);
   const form = useForm<ConsultationFormData>({
     resolver: zodResolver(consultationSchema),
     defaultValues: {
       dateConsultation: new Date(),
+      ordonnance: "",
+      commentaire: "",
+      dosage: "",
+      dateRendezVous: null,
+    },
+  });
+
+  const { mutate: createConsultation, isLoading: isSubmitting } = useMutation({
+    mutationFn: async (data: ConsultationFormData) => {
+      if (!session?.user) {
+        throw new Error("Utilisateur non authentifié");
+      }
+      const user = session.user as SessionUser;
+      const consultationData = {
+        ...data,
+        doctorId: user.id,
+        dateConsultation: data.dateConsultation.toISOString(),
+        dateRendezVous: data.dateRendezVous?.toISOString() || null,
+      };
+      console.log("Données à envoyer:", consultationData);
+      return axios.post("/api/consultations", consultationData);
+    },
+    onSuccess: () => {
+      toast.success("Consultation créée avec succès");
+      router.push("/dashboard/consultations");
+    },
+    onError: (error: any) => {
+      console.error("Erreur détaillée:", error.response?.data || error);
+      toast.error(error.response?.data?.message || "Erreur lors de la création de la consultation");
     },
   });
 
   const onSubmit = (data: ConsultationFormData) => {
-    console.log(data);
-    // TODO: Implémenter la logique de soumission
+    console.log("Données du formulaire:", data);
+    createConsultation(data);
   };
-
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Nouvelle Consultation</h1>
@@ -40,16 +115,37 @@ export default function AddConsultationPage() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Patient</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un patient" />
+                      <SelectValue
+                        placeholder={
+                          isLoading
+                            ? "Chargement..."
+                            : "Sélectionner un patient"
+                        }
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {/* TODO: Remplir avec la liste des patients */}
-                    <SelectItem value="1">Patient 1</SelectItem>
-                    <SelectItem value="2">Patient 2</SelectItem>
+                    {isLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Chargement...
+                      </SelectItem>
+                    ) : patients?.length > 0 ? (
+                      patients.map((patient: Patient) => (
+                        <SelectItem key={patient._id} value={patient._id}>
+                          {patient.firstName} {patient.telephone}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-data" disabled>
+                        Aucun patient trouvé
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
