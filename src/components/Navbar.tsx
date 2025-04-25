@@ -35,6 +35,9 @@ const Navbar = () => {
             <li className="flex items-center gap-3 p-4 hover:bg-blue-500 cursor-pointer rounded">
               <Link href="/dashboard/patients">patients</Link>
             </li>
+            <li className="flex items-center gap-3 p-4 hover:bg-blue-500 cursor-pointer rounded">
+              <Link href="/dashboard/consultation">Consultations</Link>
+            </li>
           </ul>
         </nav>
       </div>

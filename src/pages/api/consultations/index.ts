@@ -28,9 +28,42 @@ handler
       const skip = pageIndex * pageSize;
       const pipeline = [
         { $match: { doctorId } },
-        { $sort: { dateConsultation: -1, _id: -1 } },
+        {
+          $lookup: {
+            from: "patients",
+            localField: "patientId",
+            foreignField: "_id",
+            as: "patientInfo"
+          }
+        },
+        { $unwind: "$patientInfo" },
+        {
+          $project: {
+            _id: 1,
+            date: 1,
+            symptoms: 1,
+            diagnosis: 1,
+            prescription: 1,
+            notes: 1,
+            patient: {
+              _id: "$patientInfo._id",
+              firstName: "$patientInfo.firstName",
+              lastName: "$patientInfo.lastName",
+              nni: "$patientInfo.nni",
+              medicalHistory: "$patientInfo.medicalHistory",
+              telephone: "$patientInfo.telephone",
+              adress: "$patientInfo.adress",
+              age: "$patientInfo.age",
+              createdAt: "$patientInfo.createdAt",
+              updatedAt: "$patientInfo.updatedAt"
+            },
+            createdAt: 1,
+            updatedAt: 1
+          }
+        },
+        { $sort: { date: -1, _id: -1 } },
         { $skip: skip },
-        { $limit: pageSize },
+        { $limit: pageSize }
       ];
 
       const data = await db
