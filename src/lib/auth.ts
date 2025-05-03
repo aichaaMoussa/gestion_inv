@@ -9,10 +9,17 @@ if (!JWT_SECRET) {
   );
 }
 
+interface DecodedToken {
+  id: string;
+  email: string;
+  role: string;
+  [key: string]: any;
+}
+
 export function authenticate(
   req: NextApiRequest,
   res: NextApiResponse,
-  next: any
+  next: () => void
 ) {
   const token = req.headers.authorization?.split(" ")[1];
 
@@ -21,10 +28,11 @@ export function authenticate(
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
     req.user = decoded;
     next();
   } catch (error) {
+    console.error("Token verification error:", error);
     res.status(401).json({ message: "Token invalide" });
   }
 }

@@ -1,4 +1,9 @@
 import { MongoClient } from "mongodb";
+import { NextApiRequest, NextApiResponse } from "next";
+
+declare global {
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
@@ -23,7 +28,16 @@ if (process.env.NODE_ENV === "development") {
   clientPromise = client.connect();
 }
 
-export default async function database(req: any, res: any, next: any) {
+interface RequestWithDb extends NextApiRequest {
+  dbClient: MongoClient;
+  db: any;
+}
+
+export default async function database(
+  req: RequestWithDb,
+  res: NextApiResponse,
+  next: () => void
+) {
   if (!clientPromise) {
     client = new MongoClient(uri, options);
     clientPromise = client.connect();
