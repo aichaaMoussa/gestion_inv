@@ -34,6 +34,7 @@ export default function App() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>();
   const {
@@ -49,7 +50,9 @@ export default function App() {
   });
   const { push } = useRouter();
 
-  const { mutate, isLoading: isSubmitting } = useMutation({
+  const roleId = watch("roleId");
+
+  const { mutate } = useMutation({
     mutationKey: ["user"],
     mutationFn: async (data: FormData) => {
       return axios.post("/api/user", data);
@@ -75,10 +78,9 @@ export default function App() {
 
   const onSubmit = (data: FormData) => {
     if (!data.roleId) {
-      alert("Veuillez sélectionner un rôle.");
+      toast.error("Veuillez sélectionner un rôle.");
       return;
     }
-    console.log("Form data submitted:", data);
     mutate(data);
   };
 
@@ -98,18 +100,18 @@ export default function App() {
               label="French Name"
               id="nom"
               name="nom"
-              placeholder="Enter name in French"
-              error={errors.nom ? { message: errors.nom.message } : undefined}
               register={register}
+              placeholder="Enter name in French"
+              error={errors.nom}
             />
             <Input
               type="text"
-              label="French Surname"
+              label="Last Name"
               id="prenom"
               name="prenom"
-              placeholder="Enter surname in French"
-              error={errors.prenom ? { message: errors.prenom.message } : undefined}
               register={register}
+              placeholder="Enter surname in French"
+              error={errors.prenom}
             />
             <Input
               type="text"
@@ -156,17 +158,20 @@ export default function App() {
               error={errors.confirmPassword ? { message: errors.confirmPassword.message } : undefined}
               register={register}
             />
-            <Select
-              label="Role"
-              id="role"
-              name="roleId"
-              options={roleOptions}
-              placeholder={isLoading ? "Loading roles..." : "Select a role"}
-              isDisabled={isLoading || roleError}
-              onChange={(value: string) => {
-                setValue("roleId", value);
-              }}
-            />
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 mb-1">Role</label>
+              <Select
+                options={roleOptions}
+                value={roleId || ""}
+                onChange={(value: string | number) => setValue("roleId", value as string)}
+                errorMessage={errors.roleId?.message}
+                placeholder="Select a role"
+                isDisabled={isLoading}
+              />
+              {errors.roleId?.message && (
+                <p className="mt-1 text-sm text-red-600">{errors.roleId.message}</p>
+              )}
+            </div>
             <div className="col-span-2 flex justify-end gap-4">
               <button
                 type="button"
