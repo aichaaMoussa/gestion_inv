@@ -1,12 +1,12 @@
 import { ChangeEvent, FC } from "react";
-import { UseFormRegister } from "react-hook-form";
+import { UseFormRegister, FieldValues, Path } from "react-hook-form";
 
-interface InputProps {
+interface InputProps<T extends FieldValues> {
   type: "text" | "number" | "email" | "password";
   id: string;
   label: string;
-  register: UseFormRegister<any>; // Replace `any` with the actual type of your form data
-  name: string;
+  register: UseFormRegister<T>;
+  name: Path<T>;
   placeholder: string;
   error?: { message?: string }; // Error object to display specific messages
   disabled?: boolean;
@@ -14,7 +14,7 @@ interface InputProps {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const Input: FC<InputProps> = ({
+const Input = <T extends FieldValues>({
   type,
   id,
   label,
@@ -25,7 +25,7 @@ const Input: FC<InputProps> = ({
   disabled,
   onChange,
   autofocus = false,
-}) => {
+}: InputProps<T>) => {
   return (
     <div className="input-wrapper">
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
