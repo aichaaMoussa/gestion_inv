@@ -1,10 +1,27 @@
 import React from "react";
-import { useTable, usePagination, Column, Row } from "react-table";
+import { useTable, usePagination, Column, Row, HeaderGroup, Cell, TableInstance, TableState, ColumnInstance } from "react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Icônes pour pagination
 
 interface TableProps<T extends object> {
   columns: Column<T>[];
   data: T[];
+}
+
+interface TableStateWithPagination<T extends object> extends TableState<T> {
+  pageIndex: number;
+  pageSize: number;
+}
+
+interface TableInstanceWithPagination<T extends object> extends TableInstance<T> {
+  page: Row<T>[];
+  nextPage: () => void;
+  previousPage: () => void;
+  canNextPage: boolean;
+  canPreviousPage: boolean;
+  gotoPage: (pageIndex: number) => void;
+  pageOptions: number[];
+  setPageSize: (pageSize: number) => void;
+  state: TableStateWithPagination<T>;
 }
 
 const Table = <T extends object>({ columns, data }: TableProps<T>) => {
@@ -26,19 +43,19 @@ const Table = <T extends object>({ columns, data }: TableProps<T>) => {
     {
       columns,
       data,
-      initialState: { pageIndex: 0, pageSize: 5 },
+      initialState: { pageIndex: 0, pageSize: 5 } as TableStateWithPagination<T>,
     },
     usePagination
-  );
+  ) as TableInstanceWithPagination<T>;
 
   return (
     <div className="p-4 bg-white rounded-md ">
       {/* Tableau */}
       <table {...getTableProps()} className="w-full border-collapse">
         <thead className="bg-sky-50 border-b-2 border-gray-400">
-          {headerGroups.map((headerGroup, headerGroupIndex) => (
+          {headerGroups.map((headerGroup: HeaderGroup<T>, headerGroupIndex: number) => (
             <tr key={`header-group-${headerGroupIndex}`} {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column, columnIndex) => (
+              {headerGroup.headers.map((column: ColumnInstance<T>, columnIndex: number) => (
                 <th
                   key={`header-${columnIndex}`}
                   {...column.getHeaderProps()}
@@ -51,7 +68,7 @@ const Table = <T extends object>({ columns, data }: TableProps<T>) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map((row: Row<T>, rowIndex) => {
+          {page.map((row: Row<T>, rowIndex: number) => {
             prepareRow(row);
             return (
               <tr
@@ -59,7 +76,7 @@ const Table = <T extends object>({ columns, data }: TableProps<T>) => {
                 {...row.getRowProps()}
                 className="border-b border-gray-300 hover:bg-gray-50"
               >
-                {row.cells.map((cell, cellIndex) => (
+                {row.cells.map((cell: Cell<T>, cellIndex: number) => (
                   <td
                     key={`cell-${rowIndex}-${cellIndex}`}
                     {...cell.getCellProps()}
@@ -102,17 +119,17 @@ const Table = <T extends object>({ columns, data }: TableProps<T>) => {
             <ChevronLeft size={20} />
           </button>
 
-          {pageOptions.map((page, index) => (
+          {pageOptions.map((pageNumber: number, index: number) => (
             <button
               key={`page-${index}`}
-              onClick={() => gotoPage(page)}
+              onClick={() => gotoPage(pageNumber)}
               className={`px-3 py-1 text-sm rounded ${
-                pageIndex === page
+                pageIndex === pageNumber
                   ? "bg-blue-500 text-white"
                   : "text-gray-700 hover:bg-gray-200"
               }`}
             >
-              {page + 1}
+              {pageNumber + 1}
             </button>
           ))}
 
