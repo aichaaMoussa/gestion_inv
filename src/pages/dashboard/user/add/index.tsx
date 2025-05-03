@@ -40,7 +40,7 @@ export default function App() {
   const {
     data: roles,
     isLoading,
-     } = useQuery<RoleResponse>({
+  } = useQuery<RoleResponse>({
     queryKey: ["role"],
     queryFn: async () => {
       const response = await axios.get("/api/role");
@@ -101,7 +101,7 @@ export default function App() {
               name="nom"
               register={register}
               placeholder="Enter name in French"
-              error={errors.nom}
+              error={errors.nom ? { message: errors.nom.message } : undefined}
             />
             <Input
               type="text"
@@ -110,7 +110,7 @@ export default function App() {
               name="prenom"
               register={register}
               placeholder="Enter surname in French"
-              error={errors.prenom}
+              error={errors.prenom ? { message: errors.prenom.message } : undefined}
             />
             <Input
               type="text"
@@ -118,7 +118,7 @@ export default function App() {
               id="nni"
               name="nni"
               placeholder="Enter NNI"
-              error={!!errors.nni}
+              error={errors.nni ? { message: errors.nni.message } : undefined}
               register={register}
             />
             <Input
@@ -162,7 +162,7 @@ export default function App() {
               <Select
                 options={roleOptions}
                 value={roleId || ""}
-                onChange={(value: string | number) => setValue("roleId", value as string)}
+                onChange={(value: string | string[]) => setValue("roleId", value as string)}
                 errorMessage={errors.roleId?.message}
                 placeholder="Select a role"
                 isDisabled={isLoading}
