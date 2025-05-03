@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { PatientSchema } from "@/schemas/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Session } from "next-auth";
+
 
 // Extend the session type to include custom properties
 declare module "next-auth" {

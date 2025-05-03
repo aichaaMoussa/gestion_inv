@@ -3,7 +3,7 @@ import axios from "axios";
 import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { QueryClient, useMutation, useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
 
 interface Patient {
