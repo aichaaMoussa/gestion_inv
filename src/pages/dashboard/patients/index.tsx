@@ -4,33 +4,24 @@ import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { QueryClient, useMutation, useQuery } from "react-query";
-import { isQueryKey } from "react-query/types/core/utils";
 import { toast } from "react-toastify";
 
+interface Patient {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  telephone: string;
+  age: string;
+  adress: string;
+}
+
 const TablePage = () => {
-  const { mutate: updateMutation } = useMutation({
-    mutationKey: ["user"],
-    mutationFn: async (updatedRole) => {
-      const response = await axios.put("/api/patients", updatedRole);
-      return response.data;
-    },
-
-    onSuccess: () => {
-      QueryClient.invalidateQueries({ QueryKey: ["user"] });
-      toast.success("Role modifié avec succès !");
-    },
-    onError: () => {
-      toast.error("Erreur lors de la modification du rôle.");
-    },
-  });
-
-  const { mutate: delatMutation } = useMutation({
+  const { mutate: deleteMutation } = useMutation({
     mutationKey: ["role"],
-    mutationFn: async (_id) => {
+    mutationFn: async (_id: string) => {
       const response = await axios.delete("/api/patients/" + _id);
       return response.data;
     },
-
     onSuccess: () => {
       toast.success("patients supprimé avec succès !");
     },
@@ -40,27 +31,25 @@ const TablePage = () => {
   });
 
   const { data } = useQuery(["user"], async () => {
-    const session = await axios.get("/api/auth/session"); // Récupérer la session
-    const userId = session.data?.user?.id; // Extraire l'ID de l'utilisateur connecté
+    const session = await axios.get("/api/auth/session");
+    const userId = session.data?.user?.id;
 
     if (!userId) {
       throw new Error("Utilisateur non authentifié");
     }
 
     const response = await axios.get("/api/patients", {
-      params: { user: userId }, // Envoyer l'ID du médecin
+      params: { user: userId },
     });
 
     return response.data;
   });
 
-  console.log("data", data);
   const columns = React.useMemo(
     () => [
-      
       {
         Header: "nom",
-        accessor: "firstName", // Correspond à la clé `name` dans les données
+        accessor: "firstName",
       },
       {
         Header: "prenom",
@@ -71,11 +60,9 @@ const TablePage = () => {
         accessor: "telephone",
       },
       {
-
         Header: "age",
         accessor: "age",
       },
-      
       {
         Header: "adress",
         accessor: "adress",
@@ -83,7 +70,7 @@ const TablePage = () => {
       {
         Header: "Actions",
         accessor: "actions",
-        Cell: ({ row }) => (
+        Cell: ({ row }: { row: { original: Patient } }) => (
           <div className="flex space-x-2">
             <Link
               href={`/dashboard/patients/add/${row.original._id?.toString() || ""}`}
@@ -91,17 +78,16 @@ const TablePage = () => {
               <Pencil size={20} />
             </Link>
             <button
-              onClick={() => delatMutation(row.original._id?.toString())}
+              onClick={() => deleteMutation(row.original._id?.toString())}
               className="px-3 py-1  text-white rounded"
             >
-               <Trash className="text-black" size={20} />
+              <Trash className="text-black" size={20} />
             </button>
           </div>
-          
         ),
       },
     ],
-    []
+    [deleteMutation]
   );
 
   return (

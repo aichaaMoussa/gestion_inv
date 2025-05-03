@@ -13,13 +13,9 @@ interface Role {
   namear: string;
 }
 
-interface RoleResponse {
-  roles: Role[];
-}
-
 const TablePage = () => {
   const { mutate: deleteMutation } = useMutation({
-    mutationFn: async (_id) => {
+    mutationFn: async (_id: string) => {
       const response = await axios.delete(`/api/role/${_id}`);
       return response.data;
     },
