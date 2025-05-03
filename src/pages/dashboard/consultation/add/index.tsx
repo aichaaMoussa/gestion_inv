@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -92,9 +92,13 @@ const AddConsultationPage: React.FC = () => {
       await axios.post('/api/consultations', consultationData);
       toast.success('Consultation ajoutée avec succès');
       router.push('/dashboard/consultation');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erreur lors de l\'ajout de la consultation:', error);
-      toast.error(error.response?.data?.message || 'Erreur lors de l\'ajout de la consultation');
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || 'Erreur lors de l\'ajout de la consultation');
+      } else {
+        toast.error('Une erreur inattendue est survenue');
+      }
     }
   };
 

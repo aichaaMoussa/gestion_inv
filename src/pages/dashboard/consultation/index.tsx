@@ -138,19 +138,19 @@ const ConsultationPage: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nom du Patient</TableCell>
-              <TableCell>Numéro de Téléphone</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell key="name">Nom du Patient</TableCell>
+              <TableCell key="phone">Numéro de Téléphone</TableCell>
+              <TableCell key="date">Date</TableCell>
+              <TableCell key="actions">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredConsultations.map((consultation: Consultation) => (
               <TableRow key={consultation._id}>
-                <TableCell>{`${consultation.patient.firstName} ${consultation.patient.lastName}`}</TableCell>
-                <TableCell>{consultation.patient.telephone}</TableCell>
-                <TableCell>{consultation.createdAt}</TableCell>
-                <TableCell>
+                <TableCell key={`${consultation._id}-name`}>{`${consultation.patient.firstName} ${consultation.patient.lastName}`}</TableCell>
+                <TableCell key={`${consultation._id}-phone`}>{consultation.patient.telephone}</TableCell>
+                <TableCell key={`${consultation._id}-date`}>{consultation.createdAt}</TableCell>
+                <TableCell key={`${consultation._id}-actions`}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
                       color="primary"

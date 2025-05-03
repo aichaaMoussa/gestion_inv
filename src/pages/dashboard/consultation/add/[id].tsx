@@ -129,9 +129,13 @@ const UpdateConsultationPage: React.FC = () => {
       await axios.put(`/api/consultations/${id}`, consultationUpdateData);
       toast.success('Consultation mise à jour avec succès');
       router.push('/dashboard/consultation');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la mise à jour de la consultation:', error);
-      toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour de la consultation');
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour de la consultation');
+      } else {
+        toast.error('Une erreur inattendue est survenue');
+      }
     }
   };
 
