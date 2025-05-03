@@ -7,6 +7,16 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import { Pencil, Trash } from "lucide-react";
 
+interface Role {
+  _id: string;
+  namefr: string;
+  namear: string;
+}
+
+interface RoleResponse {
+  roles: Role[];
+}
+
 const TablePage = () => {
   const { mutate: deleteMutation } = useMutation({
     mutationFn: async (_id) => {
@@ -29,21 +39,17 @@ const TablePage = () => {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Index",
-        accessor: (row, i) => i + 1,
-      },
-      {
-        Header: "Nom (FR)",
+        Header: "Nom",
         accessor: "namefr",
       },
       {
-        Header: "Nom (AR)",
+        Header: "Nom en arabe",
         accessor: "namear",
       },
       {
         Header: "Actions",
         accessor: "actions",
-        Cell: ({ row }) => (
+        Cell: ({ row }: { row: { original: Role } }) => (
           <div className="flex space-x-2">
             <Link
               href={`/dashboard/role/add/${row.original._id?.toString() || ""}`}
@@ -52,7 +58,7 @@ const TablePage = () => {
               <Pencil size={20} />
             </Link>
             <button
-              onClick={() => deleteMutation(row.original._id?.toString())}
+              onClick={() => deleteMutation(row.original._id?.toString() || "")}
               className="px-3 py-1  text-white rounded"
             >
               <Trash className="text-black" size={20} />
@@ -61,7 +67,7 @@ const TablePage = () => {
         ),
       },
     ],
-    []
+    [deleteMutation]
   );
 
   return (
