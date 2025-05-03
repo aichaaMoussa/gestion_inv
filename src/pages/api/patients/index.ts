@@ -43,7 +43,7 @@ handler
 
       console.log("Données retournées :", data);
       res.status(200).json({ roles: data, count });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur API :", error);
       res.status(500).json({ statusCode: 500, message: error.message });
     }
@@ -78,7 +78,7 @@ handler
       });
 
       res.status(201).json({ message: "Patient ajouté avec succès" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'ajout :", error);
       res.status(500).json({ error: "Erreur lors de l'ajout du patient" });
     }
