@@ -8,12 +8,12 @@ import { connectToDb } from "@/lib/mongoose";
 const handler = nextConnect();
 
 handler
-  .get(async (req: any, res: NextApiResponse) => {
+  .get(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const db = await connectToDb();
 
-      const pageSize = parseInt(req.query.pageSize || "20", 10);
-      const pageIndex = parseInt(req.query.pageIndex || "0", 10);
+      const pageSize = parseInt(req.query.pageSize as string || "20", 10);
+      const pageIndex = parseInt(req.query.pageIndex as string || "0", 10);
 
       if (isNaN(pageSize) || isNaN(pageIndex)) {
         return res.status(400).json({ message: "Paramètres invalides" });
@@ -31,13 +31,13 @@ handler
 
       console.log("Données retournées :", data);
       res.status(200).json({ roles: data, count });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, message: error.message });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
-    const { user, body: data } = req;
+    const { body: data } = req;
 
     if (!MedicalHistorySchema.safeParse(data).success)
       return res.status(400).json({ message: "invalid data" });

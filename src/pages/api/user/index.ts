@@ -6,13 +6,14 @@ import { connectToDb } from "@/lib/mongoose";
 import { userShemas } from "@/schemas/schemas";
 
 const handler = nextConnect();
+
 handler
-  .get(async (req: any, res: NextApiResponse) => {
+  .get(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const db = await connectToDb();
 
-      const pageSize = parseInt(req.query.pageSize || "20", 10);
-      const pageIndex = parseInt(req.query.pageIndex || "0", 10);
+      const pageSize = parseInt(req.query.pageSize as string || "20", 10);
+      const pageIndex = parseInt(req.query.pageIndex as string || "0", 10);
 
       if (isNaN(pageSize) || isNaN(pageIndex)) {
         return res.status(400).json({ message: "Paramètres invalides" });
@@ -28,26 +29,19 @@ handler
       const data = await db.collection("users").aggregate(pipeline).toArray();
       const count = await db.collection("users").countDocuments();
 
-      console.log("Données retournées :", data);
-      res.status(200).json({ roles: data, count });
-    } catch (error) {
+      res.status(200).json({ users: data, count });
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, message: error.message });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
-    const { user, body: data } = req;
-    console.log("Data received in API:", data);
-
-    if (!userShemas.safeParse(data).success)
-      return res.status(400).json({ message: "invalid data" });
+    const { body: data } = req;
 
     try {
       const date = new Date();
-
       const db = await connectToDb();
-      const hashedPassword = await bcrypt.hash(data.password, 10);
-      data.password = hashedPassword;
+
       if (data?.roleId) data.roleId = new ObjectId(data?.roleId);
 
       await db.collection("users").insertOne({
@@ -56,10 +50,10 @@ handler
         updatedAt: date,
       });
 
-      res.status(201).json({ message: "Group created" });
+      res.status(201).json({ message: "User created" });
     } catch (err) {
       console.log("error", err);
-      return res.status(500).json({ error: "Error creating group" });
+      return res.status(500).json({ error: "Error creating user" });
     }
   });
 

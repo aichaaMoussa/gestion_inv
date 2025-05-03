@@ -8,7 +8,7 @@ import { userShemas } from "@/schemas/schemas";
 const handler = nextConnect();
 
 handler
-  .get(async (req: any, res: NextApiResponse) => {
+  .get(async (req: NextApiRequest, res: NextApiResponse) => {
     const { id } = req.query;
     if (!id) {
       return res.status(400).json({ error: "Invalid ID" });
@@ -16,17 +16,16 @@ handler
     try {
       const db = await connectToDb();
 
-      const users = await db
+      const user = await db
         .collection("users")
         .findOne({ _id: new ObjectId(id as string) });
-      if (!users) {
-        return res.status(404).json({ error: "role not fond" });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
-      console.log("users", users);
-      res.json(users);
-    } catch (error) {
+      res.json(user);
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, error });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
   .put(async (req: NextApiRequest, res: NextApiResponse) => {
@@ -80,9 +79,9 @@ handler
       }
 
       res.status(200).json({ message: "User updated successfully" });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, error: "Erreur serveur" });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
 
@@ -94,14 +93,14 @@ handler
         return res.status(400).json({ error: "Invalid ID" });
       }
       const db = await connectToDb();
-      const result = await db
+      await db
         .collection("users")
         .deleteOne({ _id: new ObjectId(id as string) });
 
-      res.status(200).json({ message: "user deleted successfully" });
-    } catch (error) {
+      res.status(200).json({ message: "User deleted successfully" });
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, message: error.message });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   });
 
