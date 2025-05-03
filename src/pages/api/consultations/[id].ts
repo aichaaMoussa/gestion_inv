@@ -7,7 +7,7 @@ import { consultationSchema } from "@/schemas/consultation";
 const handler = nextConnect();
 
 handler
-  .get(async (req: any, res: NextApiResponse) => {
+  .get(async (req: NextApiRequest, res: NextApiResponse) => {
     const { id } = req.query;
     if (!id) {
       return res.status(400).json({ error: "Invalid ID" });
@@ -21,11 +21,10 @@ handler
       if (!consultation) {
         return res.status(404).json({ error: "Consultation not found" });
       }
-      console.log("consultation", consultation);
       res.json(consultation);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, error });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
   .put(async (req: NextApiRequest, res: NextApiResponse) => {
@@ -48,12 +47,10 @@ handler
         dateRendezVous: req.body.dateRendezVous ? new Date(req.body.dateRendezVous) : null
       };
      
-      // Convertir patientId en ObjectId si présent
       if (updatedData.patientId) {
         updatedData.patientId = new ObjectId(updatedData.patientId);
       }
       
-      // Convertir doctorId en ObjectId si présent
       if (updatedData.doctorId) {
         updatedData.doctorId = new ObjectId(updatedData.doctorId);
       }
@@ -67,7 +64,6 @@ handler
         return res.status(404).json({ error: "Consultation not found" });
       }
 
-      console.log("Données reçues pour mise à jour:", req.body);
       const validation = consultationSchema.safeParse({
         ...req.body,
         dateConsultation: new Date(req.body.dateConsultation),
@@ -81,23 +77,16 @@ handler
           .json({ message: "Invalid data", errors: validation.error });
       }
 
-      const result = await db
+      await db
         .collection("consultations")
         .updateOne({ _id: new ObjectId(id as string) }, { $set: updatedData });
 
-      console.log("Résultat de la mise à jour:", result);
-
-      if (result.matchedCount === 0) {
-        return res.status(404).json({ message: "Consultation not found" });
-      }
-
       res.status(200).json({ message: "Consultation updated successfully" });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, error: "Erreur serveur" });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
-
   .delete(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const { id } = req.query;
@@ -106,14 +95,14 @@ handler
         return res.status(400).json({ error: "Invalid ID" });
       }
       const db = await connectToDb();
-      const result = await db
+      await db
         .collection("consultations")
         .deleteOne({ _id: new ObjectId(id as string) });
 
       res.status(200).json({ message: "Consultation deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, message: error.message });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   });
 

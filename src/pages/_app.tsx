@@ -37,13 +37,12 @@ export default function App({
   const router = useRouter();
   const queryClient = new QueryClient();
 
-  // Pages nécessitant la barre de navigation
   const dashboardPages = [
-    "/dashboard",
-    "/dashboard/roles",
-    "/dashboard/patients",
+    { path: "/dashboard", key: "dashboard" },
+    { path: "/dashboard/roles", key: "roles" },
+    { path: "/dashboard/patients", key: "patients" },
   ];
-  const showNavbar = dashboardPages.some((path) =>
+  const showNavbar = dashboardPages.some(({ path }) =>
     router.pathname.startsWith(path)
   );
 
