@@ -1,11 +1,11 @@
 import React from "react";
-
-import Table from "@/components/Table"; // Importez votre composant Table
+import Table from "@/components/Table";
 import axios from "axios";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { Pencil, Trash } from "lucide-react";
+import { Column } from "react-table";
 
 interface Role {
   _id: string;
@@ -32,7 +32,7 @@ const TablePage = () => {
     return response.data;
   });
 
-  const columns = React.useMemo(
+  const columns = React.useMemo<Column<Role>[]>(
     () => [
       {
         Header: "Nom",
@@ -44,7 +44,7 @@ const TablePage = () => {
       },
       {
         Header: "Actions",
-        accessor: "actions",
+        accessor: "_id",
         Cell: ({ row }: { row: { original: Role } }) => (
           <div className="flex space-x-2">
             <Link
