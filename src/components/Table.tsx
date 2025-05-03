@@ -53,11 +53,10 @@ const Table = <T extends object>({ columns, data }: TableProps<T>) => {
       {/* Tableau */}
       <table {...getTableProps()} className="w-full border-collapse">
         <thead className="bg-sky-50 border-b-2 border-gray-400">
-          {headerGroups.map((headerGroup: HeaderGroup<T>, headerGroupIndex: number) => (
-            <tr key={`header-group-${headerGroupIndex}`} {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column: ColumnInstance<T>, columnIndex: number) => (
+          {headerGroups.map((headerGroup: HeaderGroup<T>) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column: ColumnInstance<T>) => (
                 <th
-                  key={`header-${columnIndex}`}
                   {...column.getHeaderProps()}
                   className="px-4 py-3 text-left text-sm font-semibold text-gray-700"
                 >
@@ -68,17 +67,15 @@ const Table = <T extends object>({ columns, data }: TableProps<T>) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map((row: Row<T>, rowIndex: number) => {
+          {page.map((row: Row<T>) => {
             prepareRow(row);
             return (
               <tr
-                key={`row-${rowIndex}`}
                 {...row.getRowProps()}
                 className="border-b border-gray-300 hover:bg-gray-50"
               >
-                {row.cells.map((cell: Cell<T>, cellIndex: number) => (
+                {row.cells.map((cell: Cell<T>) => (
                   <td
-                    key={`cell-${rowIndex}-${cellIndex}`}
                     {...cell.getCellProps()}
                     className="px-4 py-3 text-sm text-gray-600"
                   >
