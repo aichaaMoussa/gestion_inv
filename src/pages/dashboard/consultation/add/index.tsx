@@ -11,6 +11,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import axios from 'axios';
@@ -52,8 +53,8 @@ const AddConsultationPage: React.FC = () => {
       const response = await axios.get("/api/patients", {
         params: { user: userId },
       });
-      console.log("Patients récupérés:", response.data); // Pour le débogage
-      return response.data; // Retourner l'objet complet
+      console.log("Patients récupérés:", response.data);
+      return response.data;
     } catch (error) {
       console.error("Erreur lors de la récupération des patients:", error);
       toast.error("Erreur lors de la récupération des patients");
@@ -61,7 +62,6 @@ const AddConsultationPage: React.FC = () => {
     }
   });
 
-  // Extraire les patients du champ 'roles'
   const patients = data?.roles || [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +70,10 @@ const AddConsultationPage: React.FC = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    setFormData(prev => ({ ...prev, patientId: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,37 +114,35 @@ const AddConsultationPage: React.FC = () => {
 
       <Paper sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Patient</InputLabel>
-                <Select
-                  name="patientId"
-                  value={formData.patientId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, patientId: e.target.value }))}
-                  required
-                  disabled={isLoadingPatients}
-                >
-                  {isLoadingPatients ? (
-                    <MenuItem value="" disabled>
-                      Chargement des patients...
+          <Box sx={{ display: 'grid', gap: 3 }}>
+            <FormControl fullWidth>
+              <InputLabel>Patient</InputLabel>
+              <Select
+                name="patientId"
+                value={formData.patientId}
+                onChange={handleSelectChange}
+                required
+                disabled={isLoadingPatients}
+              >
+                {isLoadingPatients ? (
+                  <MenuItem value="" disabled>
+                    Chargement des patients...
+                  </MenuItem>
+                ) : patients && patients.length > 0 ? (
+                  patients.map((patient: Patient) => (
+                    <MenuItem key={patient._id} value={patient._id}>
+                      {`${patient.firstName} ${patient.lastName} - ${patient.telephone}`}
                     </MenuItem>
-                  ) : patients && patients.length > 0 ? (
-                    patients.map((patient: Patient) => (
-                      <MenuItem key={patient._id} value={patient._id}>
-                        {`${patient.firstName} ${patient.lastName} - ${patient.telephone}`}
-                      </MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem value="" disabled>
-                      Aucun patient trouvé
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
+                  ))
+                ) : (
+                  <MenuItem value="" disabled>
+                    Aucun patient trouvé
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
 
-            <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
               <TextField
                 fullWidth
                 label="Date de Consultation"
@@ -153,9 +155,7 @@ const AddConsultationPage: React.FC = () => {
                   shrink: true,
                 }}
               />
-            </Grid>
 
-            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Date de Rendez-vous"
@@ -167,77 +167,67 @@ const AddConsultationPage: React.FC = () => {
                   shrink: true,
                 }}
               />
-            </Grid>
+            </Box>
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Symptômes"
-                name="symptoms"
-                value={formData.symptoms}
-                onChange={handleChange}
-                multiline
-                rows={4}
-                required
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="Symptômes"
+              name="symptoms"
+              value={formData.symptoms}
+              onChange={handleChange}
+              multiline
+              rows={4}
+              required
+            />
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Diagnostic"
-                name="diagnosis"
-                value={formData.diagnosis}
-                onChange={handleChange}
-                multiline
-                rows={4}
-                required
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="Diagnostic"
+              name="diagnosis"
+              value={formData.diagnosis}
+              onChange={handleChange}
+              multiline
+              rows={4}
+              required
+            />
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Prescription"
-                name="prescription"
-                value={formData.prescription}
-                onChange={handleChange}
-                multiline
-                rows={4}
-                required
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="Prescription"
+              name="prescription"
+              value={formData.prescription}
+              onChange={handleChange}
+              multiline
+              rows={4}
+              required
+            />
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                multiline
-                rows={4}
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="Notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              multiline
+              rows={4}
+            />
 
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => router.push('/dashboard/consultation')}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                >
-                  Ajouter
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => router.push('/dashboard/consultation')}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+              >
+                Ajouter
+              </Button>
+            </Box>
+          </Box>
         </form>
       </Paper>
     </Box>
