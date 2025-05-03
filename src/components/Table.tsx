@@ -1,13 +1,13 @@
 import React from "react";
-import { useTable, usePagination } from "react-table";
+import { useTable, usePagination, Column, Row } from "react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Icônes pour pagination
 
-interface TableProps {
-  columns: any[];
-  data: any[];
+interface TableProps<T extends object> {
+  columns: Column<T>[];
+  data: T[];
 }
 
-const Table: React.FC<TableProps> = ({ columns, data }) => {
+const Table = <T extends object>({ columns, data }: TableProps<T>) => {
   const {
     getTableProps,
     getTableBodyProps,
@@ -51,7 +51,7 @@ const Table: React.FC<TableProps> = ({ columns, data }) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map((row, rowIndex) => {
+          {page.map((row: Row<T>, rowIndex) => {
             prepareRow(row);
             return (
               <tr
