@@ -13,7 +13,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { PatientSchema } from "@/schemas/schemas";
 import { useSession } from "next-auth/react";
-import type { Session } from "next-auth";
 
 // Extend the session type to include custom properties
 declare module "next-auth" {
@@ -35,11 +34,6 @@ interface PatientFormData {
   adress: string;
   telephone: string;
   age: string;
-}
-
-interface Role {
-  _id: string;
-  namefr: string;
 }
 
 export default function UpdateForm() {
@@ -89,21 +83,6 @@ export default function UpdateForm() {
     mutate(formData);
   };
 
-  const { data: roles, error } = useQuery({
-    queryKey: ["role"],
-    queryFn: async () => {
-      const response = await axios.get("/api/role");
-      return response.data;
-    },
-  });
-
-  const roleOptions = roles?.roles
-    ? roles.roles.map((role: any) => ({
-        value: role._id,
-        label: role.namefr,
-      }))
-    : [];
-
   const { data: session } = useSession();
   
   useEffect(() => {
@@ -125,9 +104,7 @@ export default function UpdateForm() {
     }
   }, [data, reset, setValue]);
 
-  console.log("🔹 useForm initialisé", methods);
   const { errors } = formState;
-  console.log("⚠️ Erreurs du formulaire:", errors);
 
   return (
     <QueryClientProvider client={queryClient}>

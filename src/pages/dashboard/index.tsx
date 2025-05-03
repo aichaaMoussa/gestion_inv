@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+
 import useSessionCheck from "../hooks/useSessionCheck";
 
 export default function Dashboard() {
