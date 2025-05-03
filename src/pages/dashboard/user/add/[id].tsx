@@ -176,11 +176,11 @@ export default function UpdateForm() {
           <Select
             id="roleId"
             options={roleOptions}
-            value={selectedRoleId} // ✅ Prend la valeur actuelle
+            value={selectedRoleId}
             placeholder={isLoading ? "Loading roles..." : "Select a role"}
-            isDisabled={isLoading || error}
+            isDisabled={Boolean(isLoading || error)}
             onChange={(value) => {
-              setValue("roleId", value.toString()); // ✅ Assure la conversion en chaîne
+              setValue("roleId", value.toString());
               console.log("Role sélectionné:", value);
             }}
           />
