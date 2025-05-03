@@ -28,8 +28,11 @@ export function authenticate(
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
-    req.user = decoded;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (typeof decoded === 'string' || !decoded) {
+      throw new Error('Invalid token format');
+    }
+    req.user = decoded as DecodedToken;
     next();
   } catch (error) {
     console.error("Token verification error:", error);
