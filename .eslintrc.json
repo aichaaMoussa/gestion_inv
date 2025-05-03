@@ -1,3 +1,11 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "react/jsx-key": ["error", {
+      "checkFragmentShorthand": true,
+      "checkKeyMustBeforeSpread": true,
+      "warnOnDuplicates": true,
+      "ignore": ["tr", "th", "td"]
+    }]
+  }
 }
