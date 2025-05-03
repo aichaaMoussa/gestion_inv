@@ -8,7 +8,7 @@ import { connectToDb } from "@/lib/mongoose";
 const handler = nextConnect();
 
 handler
-  .get(async (req: any, res: NextApiResponse) => {
+  .get(async (req: NextApiRequest, res: NextApiResponse) => {
     const { id } = req.query;
     if (!id) {
       return res.status(400).json({ error: "Invalid ID" });
@@ -22,11 +22,10 @@ handler
       if (!roles) {
         return res.status(404).json({ error: "role not fond" });
       }
-      console.log("roles", roles);
       res.json(roles);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, error });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
   .put(async (req: NextApiRequest, res: NextApiResponse) => {
@@ -47,21 +46,17 @@ handler
         return res.status(400).json({ message: "Invalid data" });
       }
 
-      const result = await db
+      await db
         .collection("roles")
         .updateOne(
           { _id: new ObjectId(id as string) },
           { $set: { ...req.body, updatedAt: new Date() } }
         );
 
-      if (result.matchedCount === 0) {
-        return res.status(404).json({ message: "Role not found" });
-      }
-
       res.status(200).json({ message: "Role updated successfully" });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, error: "pas troube" });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
   .delete(async (req: NextApiRequest, res: NextApiResponse) => {
@@ -72,14 +67,14 @@ handler
         return res.status(400).json({ error: "Invalid ID" });
       }
       const db = await connectToDb();
-      const result = await db
+      await db
         .collection("roles")
         .deleteOne({ _id: new ObjectId(id as string) });
 
       res.status(200).json({ message: "Role deleted successfully" });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, message: error.message });
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   });
 

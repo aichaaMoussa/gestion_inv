@@ -6,7 +6,7 @@ const handler = nextConnect();
 
 handler.get(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const db = await connectToDb();
+    await connectToDb();
     res.status(200).json({ message: "Database connection successful" });
   } catch (error: unknown) {
     console.error("Erreur API :", error);
