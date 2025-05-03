@@ -16,6 +16,13 @@ interface DecodedToken {
   [key: string]: string | number | boolean | null;
 }
 
+// Extension du type NextApiRequest pour inclure la propriété user
+declare module "next" {
+  interface NextApiRequest {
+    user?: DecodedToken;
+  }
+}
+
 export function authenticate(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -28,7 +35,7 @@ export function authenticate(
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET as string);
     if (typeof decoded === 'string' || !decoded) {
       throw new Error('Invalid token format');
     }
