@@ -31,11 +31,11 @@ export default function App() {
     },
     onSuccess: () => {
       push("/dashboard/patients"); // ✅ Redirection après succès
-      toast.success("Utilisateur créé avec succès !");
+      toast.success("Patient créé avec succès !");
     },
     onError: (error) => {
-      console.error("Erreur lors de la création de l'utilisateur :", error);
-      toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
+      console.error("Erreur lors de la création de patient :", error);
+      toast.error("Échec de la création de patient. Veuillez réessayer.");
     },
   });
 
@@ -64,19 +64,19 @@ export default function App() {
           >
             <Input
               type="text"
-              label="French Name"
+              label="Nom"
               id="firstName"
               name="firstName"
-              placeholder="Enter name in French"
+              placeholder="Nom"
               error={!!errors.nom}
               register={register}
             />
             <Input
               type="text"
-              label="Arabic Name"
+              label="Prenom"
               id="lastName"
               name="lastName"
-              placeholder="Enter name in Arabic"
+              placeholder="Prenom"
               error={!!errors.prenom}
               register={register}
             />

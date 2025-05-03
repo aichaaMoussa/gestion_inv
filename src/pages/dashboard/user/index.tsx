@@ -6,6 +6,14 @@ import React from "react";
 import { QueryClient, useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
 
+interface User {
+  _id: string;
+  nom: string;
+  prenom: string;
+  phone: string;
+  role: string;
+}
+
 const TablePage = () => {
   // const { mutate: updateMutation } = useMutation({
   //   mutationKey: ["user"],
@@ -25,7 +33,7 @@ const TablePage = () => {
 
   const { mutate: deleteMutation } = useMutation({
     mutationKey: ["role"],
-    mutationFn: async (_id) => {
+    mutationFn: async (_id: string) => {
       const response = await axios.delete("/api/user/" + _id);
       return response.data;
     },
@@ -66,7 +74,7 @@ const TablePage = () => {
       {
         Header: "Actions",
         accessor: "actions",
-        Cell: ({ row }) => (
+        Cell: ({ row }: { row: { original: User } }) => (
           <div className="flex space-x-2">
             <Link
               href={`/dashboard/user/add/${row.original._id?.toString() || ""}`}
@@ -75,7 +83,7 @@ const TablePage = () => {
               <Pencil size={20} />
             </Link>
             <button
-              onClick={() => deleteMutation(row.original._id?.toString())}
+              onClick={() => deleteMutation(row.original._id?.toString() || "")}
               className="px-3 py-1  text-white rounded"
             >
               <Trash className="text-black" size={20} />

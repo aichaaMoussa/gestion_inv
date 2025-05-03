@@ -45,8 +45,8 @@ handler
       const updatedData = { ...req.body, updatedAt: date };
      
       // Convertir roleId en ObjectId
-      if (updatedData.roleId) {
-        updatedData.roleId = new ObjectId(updatedData.roleId);
+      if (updatedData.doctorId) {
+        updatedData.doctorId = new ObjectId(updatedData.doctorId);
       }
       const db = await connectToDb();
       const user = await db

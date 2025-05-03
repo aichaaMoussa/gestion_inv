@@ -11,6 +11,18 @@ import Input from "@/components/Input";
 import router, { useRouter } from "next/router";
 import { toast } from "react-toastify";
 
+interface Role {
+  _id: string;
+  namefr: string;
+}
+
+interface FormData {
+  roleId: string;
+  nom: string;
+  prenom: string;
+  [key: string]: string;
+}
+
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -18,9 +30,8 @@ export default function App() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<FormData>();
   const {
     data: roles,
     isLoading,
@@ -34,13 +45,13 @@ export default function App() {
   });
   const { push } = useRouter();
 
-  const { mutate, isLoading: load } = useMutation({
+  const { mutate, isLoading: isSubmitting } = useMutation({
     mutationKey: ["user"],
-    mutationFn: async (data) => {
+    mutationFn: async (data: FormData) => {
       return axios.post("/api/user", data);
     },
     onSuccess: () => {
-      push("/dashboard/user"); // ✅ Redirection après succès
+      push("/dashboard/user");
       toast.success("Utilisateur créé avec succès !");
     },
     onError: (error) => {
@@ -48,8 +59,9 @@ export default function App() {
       toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
     },
   });
+
   const roleOptions = roles?.roles
-    ? roles.roles.map((role: any) => ({
+    ? roles.roles.map((role: Role) => ({
         value: role._id,
         label: role.namefr,
       }))
@@ -57,7 +69,7 @@ export default function App() {
 
   register("roleId", { required: "Veuillez sélectionner un rôle." });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     if (!data.roleId) {
       alert("Veuillez sélectionner un rôle.");
       return;

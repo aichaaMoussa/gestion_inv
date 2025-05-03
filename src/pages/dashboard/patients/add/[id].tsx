@@ -15,6 +15,18 @@ import Select from "@/components/Select";
 import { PatientSchema, userShemas } from "@/schemas/schemas";
 import { useSession } from "next-auth/react";
 
+// Extend the session type to include custom properties
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
 export default function UpdateForm() {
   const queryClient = new QueryClient();
   const { query, push } = useRouter();
@@ -23,12 +35,12 @@ export default function UpdateForm() {
   const { data } = useQuery({
     queryKey: ["patients", id],
     queryFn: async () => {
-      if (!id) return null; // Évite un appel API avec un id null
+      if (!id) return null;
       const response = await axios.get(`/api/patients/${id}`);
       console.log("response", response);
       return response.data;
     },
-    enabled: !!id, // Empêche la requête si `id` est undefined
+    enabled: !!id,
   });
 
   useEffect(() => {
@@ -51,7 +63,6 @@ export default function UpdateForm() {
     },
   });
 
-  // React Hook Form avec Zod Resolver
   const methods = useForm({
     resolver: zodResolver(PatientSchema),
   });
@@ -77,13 +88,16 @@ export default function UpdateForm() {
         label: role.namefr,
       }))
     : [];
-    const { data: session, status } = useSession(); // Vérifie le statut de la session
+
+  const { data: session, status } = useSession();
   console.log("Session status:", status, "Session data:", session);
-    useEffect(() => {
-        if (status === "authenticated" && session?.user?.id) {
-          setValue("doctorId", session.user.id);
-        }
-      }, [session, status, setValue]);
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id) {
+      setValue("doctorId", session.user.id);
+    }
+  }, [session, status, setValue]);
+
   useEffect(() => {
     if (data) {
       console.log("Données utilisateur avant mise à jour:", data);
@@ -92,14 +106,13 @@ export default function UpdateForm() {
       setValue("lastName", data?.lastName, { shouldValidate: true });
       setValue("nni", data?.nni, { shouldValidate: true });
       setValue("telephone", data?.telephone, { shouldValidate: true });
-     
       setValue("adress", data?.adress || "", { shouldValidate: true });
-      setValue("age",data?.age || "", { shouldValidate: true }); // Mot de passe vide par sécurité
+      setValue("age", data?.age || "", { shouldValidate: true });
     }
   }, [data, reset, setValue]);
+
   console.log("🔹 useForm initialisé", methods);
   const { errors } = formState;
-
   console.log("⚠️ Erreurs du formulaire:", errors);
 
   return (
@@ -110,60 +123,60 @@ export default function UpdateForm() {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4 grid grid-cols-2"
         >
-           <Input
-              type="text"
-              label="French Name"
-              id="firstName"
-              name="firstName"
-              placeholder="Enter name in French"
-              error={!!errors.nom}
-              register={register}
-            />
-            <Input
-              type="text"
-              label="Arabic Name"
-              id="lastName"
-              name="lastName"
-              placeholder="Enter name in Arabic"
-              error={!!errors.prenom}
-              register={register}
-            />
-            <Input
-              type="text"
-              label="NNI"
-              id="nni"
-              name="nni"
-              placeholder="Enter NNI"
-              error={!!errors.nni}
-              register={register}
-            />
-             <Input
-              type="number"
-              label="telephone"
-              id="telephone"
-              name="telephone"
-              placeholder="Enter telephone"
-              error={!!errors.phone}
-              register={register}
-            /> 
-            <Input
-              type="text"
-              label="adress"
-              id="adress"
-              name="adress"
-              placeholder="Enter adress"
-              error={!!errors.nni}
-              register={register}
-            />
-            <Input
-              type="number"
-              label="age"
-              id="age"
-              name="age"
-              placeholder="Enter adress"
-              error={!!errors.nni}
-              register={register}
-            />
+          <Input
+            type="text"
+            label="Nom"
+            id="firstName"
+            name="firstName"
+            placeholder="Enter nom"
+            error={errors.firstName ? { message: errors.firstName.message } : undefined}
+            register={register}
+          />
+          <Input
+            type="text"
+            label="Prenom"
+            id="lastName"
+            name="lastName"
+            placeholder="Enter prenom"
+            error={errors.lastName ? { message: errors.lastName.message } : undefined}
+            register={register}
+          />
+          <Input
+            type="text"
+            label="NNI"
+            id="nni"
+            name="nni"
+            placeholder="Enter NNI"
+            error={errors.nni ? { message: errors.nni.message } : undefined}
+            register={register}
+          />
+          <Input
+            type="number"
+            label="telephone"
+            id="telephone"
+            name="telephone"
+            placeholder="Enter telephone"
+            error={errors.telephone ? { message: errors.telephone.message } : undefined}
+            register={register}
+          />
+          <Input
+            type="text"
+            label="adress"
+            id="adress"
+            name="adress"
+            placeholder="Enter adress"
+            error={errors.adress ? { message: errors.adress.message } : undefined}
+            register={register}
+          />
+          <Input
+            type="number"
+            label="age"
+            id="age"
+            name="age"
+            placeholder="Enter age"
+            error={errors.age ? { message: errors.age.message } : undefined}
+            register={register}
+          />
           <div className="col-span-2 flex justify-end gap-4">
             <button
               type="button"
