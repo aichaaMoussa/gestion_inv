@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 
 export default function App() {
   const { push } = useRouter();
-  const { mutate, isLoading } = useMutation({
+  const { mutate } = useMutation({
     mutationKey: ["user"],
     mutationFn: async (data: { namear: string; namefr: string }) => {
       return axios.post("/api/role", data);
@@ -36,9 +36,9 @@ export default function App() {
 
   return (
     <QueryClientProvider client={new QueryClient()}>
-      <div className="flex items-center justify-center  ">
-        <div className=" p-2 rounded-2xl  max-w-4xl w-full">
-          <h1 className="text-2xl font-semibold text-gray-700 ">
+      <div className="flex items-center justify-center">
+        <div className="p-2 rounded-2xl max-w-4xl w-full">
+          <h1 className="text-2xl font-semibold text-gray-700">
             Créer un role
           </h1>
           <form
@@ -51,7 +51,7 @@ export default function App() {
               id="namefr"
               name="namefr"
               placeholder="Enter name in French"
-              error={!!errors.namefr}
+              error={errors.namefr}
               register={register}
             />
             <Input
@@ -60,7 +60,7 @@ export default function App() {
               id="namear"
               name="namear"
               placeholder="Enter name in Arabic"
-              error={!!errors.namear}
+              error={errors.namear}
               register={register}
             />
 

@@ -25,11 +25,10 @@ const TablePage = () => {
       const response = await axios.delete("/api/user/" + _id);
       return response.data;
     },
-
     onSuccess: () => {
       toast.success("user supprimé avec succès !");
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast.error("Erreur lors de la suppression du rôle.");
     },
   });
