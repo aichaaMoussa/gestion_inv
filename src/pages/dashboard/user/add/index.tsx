@@ -23,6 +23,10 @@ interface FormData {
   [key: string]: string;
 }
 
+interface RoleResponse {
+  roles: Role[];
+}
+
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -35,8 +39,8 @@ export default function App() {
   const {
     data: roles,
     isLoading,
-    error,
-  } = useQuery({
+    error: roleError,
+  } = useQuery<RoleResponse>({
     queryKey: ["role"],
     queryFn: async () => {
       const response = await axios.get("/api/role");
@@ -54,7 +58,7 @@ export default function App() {
       push("/dashboard/user");
       toast.success("Utilisateur créé avec succès !");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Erreur lors de la création de l'utilisateur :", error);
       toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
     },
@@ -95,16 +99,16 @@ export default function App() {
               id="nom"
               name="nom"
               placeholder="Enter name in French"
-              error={!!errors.nom}
+              error={errors.nom ? { message: errors.nom.message } : undefined}
               register={register}
             />
             <Input
               type="text"
-              label="Arabic Name"
+              label="French Surname"
               id="prenom"
               name="prenom"
-              placeholder="Enter name in Arabic"
-              error={!!errors.prenom}
+              placeholder="Enter surname in French"
+              error={errors.prenom ? { message: errors.prenom.message } : undefined}
               register={register}
             />
             <Input
@@ -121,18 +125,17 @@ export default function App() {
               label="Phone"
               id="phone"
               name="phone"
-              placeholder="Enter phone"
-              error={!!errors.phone}
+              placeholder="Enter phone number"
+              error={errors.phone ? { message: errors.phone.message } : undefined}
               register={register}
             />
-
             <Input
               type="text"
-              label="Username"
-              id="username"
-              name="username"
-              placeholder="Enter username"
-              error={!!errors.username}
+              label="Email"
+              id="email"
+              name="email"
+              placeholder="Enter email"
+              error={errors.email ? { message: errors.email.message } : undefined}
               register={register}
             />
             <Input
@@ -141,20 +144,28 @@ export default function App() {
               id="password"
               name="password"
               placeholder="Enter password"
-              error={!!errors.password}
+              error={errors.password ? { message: errors.password.message } : undefined}
+              register={register}
+            />
+            <Input
+              type="password"
+              label="Confirm Password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm password"
+              error={errors.confirmPassword ? { message: errors.confirmPassword.message } : undefined}
               register={register}
             />
             <Select
-              id="roleId"
+              label="Role"
+              id="role"
+              name="roleId"
               options={roleOptions}
               placeholder={isLoading ? "Loading roles..." : "Select a role"}
-              isDisabled={isLoading || error}
-              onChange={(value) => {
+              isDisabled={isLoading || roleError}
+              onChange={(value: string) => {
                 setValue("roleId", value);
-                console.log("Role selected:", value);
               }}
-              className=""
-              errorMessage={errors.roleId?.message}
             />
             <div className="col-span-2 flex justify-end gap-4">
               <button

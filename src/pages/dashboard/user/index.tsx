@@ -3,7 +3,7 @@ import axios from "axios";
 import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { QueryClient, useMutation, useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
 
 interface User {
@@ -14,23 +14,11 @@ interface User {
   role: string;
 }
 
+interface UserResponse {
+  users: User[];
+}
+
 const TablePage = () => {
-  // const { mutate: updateMutation } = useMutation({
-  //   mutationKey: ["user"],
-  //   mutationFn: async (updatedRole) => {
-  //     const response = await axios.put("/api/user", updatedRole);
-  //     return response.data;
-  //   },
-
-  //   onSuccess: () => {
-  //     QueryClient.invalidateQueries({ queryKey: ["user"] });
-  //     toast.success("Role modifié avec succès !");
-  //   },
-  //   onError: () => {
-  //     toast.error("Erreur lors de la modification du rôle.");
-  //   },
-  // });
-
   const { mutate: deleteMutation } = useMutation({
     mutationKey: ["role"],
     mutationFn: async (_id: string) => {
@@ -41,12 +29,12 @@ const TablePage = () => {
     onSuccess: () => {
       toast.success("user supprimé avec succès !");
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast.error("Erreur lors de la suppression du rôle.");
     },
   });
 
-  const { data } = useQuery(["user"], async () => {
+  const { data } = useQuery<UserResponse>(["user"], async () => {
     const response = await axios.get("/api/user");
     return response.data;
   });
@@ -105,7 +93,7 @@ const TablePage = () => {
           </button>
         </Link>
       </div>
-      <Table columns={columns} data={data?.roles || []} />
+      <Table columns={columns} data={data?.users || []} />
     </div>
   );
 };
