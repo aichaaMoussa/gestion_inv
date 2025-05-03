@@ -1,16 +1,22 @@
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+
+interface LoginFormData {
+  username: string;
+  password: string;
+}
+
 function Login() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<LoginFormData>();
 
   const router = useRouter();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: LoginFormData) => {
     const res = await signIn("credentials", {
       redirect: false, // Ne pas rediriger immédiatement
       username: data.username,
@@ -62,4 +68,5 @@ function Login() {
     </form>
   );
 }
+
 export default Login;
