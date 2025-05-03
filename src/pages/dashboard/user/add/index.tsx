@@ -40,8 +40,7 @@ export default function App() {
   const {
     data: roles,
     isLoading,
-    error: roleError,
-  } = useQuery<RoleResponse>({
+     } = useQuery<RoleResponse>({
     queryKey: ["role"],
     queryFn: async () => {
       const response = await axios.get("/api/role");
