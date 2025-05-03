@@ -59,7 +59,7 @@ handler
         return res.status(404).json({ error: "User not found" });
       }
 
-      console.log("Données reçues pour mise à jour:", req.body); // Debug des données reçues
+      console.log("Données reçues pour mise à jour:", req.body);
       const validation = userShemas.safeParse(req.body);
       if (!validation.success) {
         console.log("Erreur validation:", validation.error);
@@ -68,15 +68,9 @@ handler
           .json({ message: "Invalid data", errors: validation.error });
       }
 
-      const result = await db
+      await db
         .collection("users")
         .updateOne({ _id: new ObjectId(id as string) }, { $set: updatedData });
-
-      console.log("Résultat de la mise à jour:", result);
-
-      if (result.matchedCount === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
 
       res.status(200).json({ message: "User updated successfully" });
     } catch (error: unknown) {
@@ -84,7 +78,6 @@ handler
       res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   })
-
   .delete(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const { id } = req.query;

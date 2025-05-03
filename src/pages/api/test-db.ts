@@ -1,19 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import connectMongo from "../../lib/mongoose";
+import nextConnect from "next-connect";
+import { connectToDb } from "@/lib/mongoose";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = nextConnect();
+
+handler.get(async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    await connectMongo();
-
-    res.status(200).json({
-      message: "Connexion à MongoDB réussie avec Mongoose",
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      message: "Erreur lors de la connexion à MongoDB avec Mongoose",
-      error: error.message,
-    });
+    const db = await connectToDb();
+    res.status(200).json({ message: "Database connection successful" });
+  } catch (error: unknown) {
+    console.error("Erreur API :", error);
+    res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
   }
-};
+});
 
 export default handler;

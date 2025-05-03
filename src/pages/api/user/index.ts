@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import nextConnect from "next-connect";
 import { ObjectId } from "mongodb";
-import bcrypt from "bcryptjs";
 import { connectToDb } from "@/lib/mongoose";
 import { userShemas } from "@/schemas/schemas";
 
@@ -38,6 +37,10 @@ handler
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
     const { body: data } = req;
 
+    if (!userShemas.safeParse(data).success) {
+      return res.status(400).json({ message: "Invalid data" });
+    }
+
     try {
       const date = new Date();
       const db = await connectToDb();
@@ -51,9 +54,9 @@ handler
       });
 
       res.status(201).json({ message: "User created" });
-    } catch (err) {
-      console.log("error", err);
-      return res.status(500).json({ error: "Error creating user" });
+    } catch (error: unknown) {
+      console.error("Erreur API :", error);
+      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
     }
   });
 
