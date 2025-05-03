@@ -32,7 +32,6 @@ export default function UpdateForm() {
 
   // 📌 Initialisation de `useForm`
   const {
-    setValue,
     register,
     formState: { errors },
     reset,
@@ -55,7 +54,7 @@ export default function UpdateForm() {
   // 🔄 Mise à jour du rôle
   const { mutate, isLoading } = useMutation({
     mutationKey: ["role", id],
-    mutationFn: async (formData: any) => {
+    mutationFn: async (formData: { namear: string; namefr: string }) => {
       console.log("📤 Envoi des données:", formData);
       const res = await axios.put(`/api/role/${id}`, formData);
       return res.data;
@@ -64,13 +63,13 @@ export default function UpdateForm() {
       toast.success("✅ Rôle modifié avec succès !");
       push("/dashboard/role");
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("❌ Erreur:", error);
       toast.error("❌ Erreur lors de la mise à jour du rôle.");
     },
   });
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: { namear: string; namefr: string }) => {
     console.log("📨 Formulaire soumis:", formData);
     mutate(formData);
   };

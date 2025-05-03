@@ -1,4 +1,3 @@
-import { z } from "zod";
 import Input from "@/components/Input";
 import axios from "axios";
 import { useForm } from "react-hook-form";
@@ -8,16 +7,16 @@ import { useRouter } from "next/router";
 
 export default function App() {
   const { push } = useRouter();
-  const { mutate, isLoading: load } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationKey: ["user"],
-    mutationFn: async (data) => {
+    mutationFn: async (data: { namear: string; namefr: string }) => {
       return axios.post("/api/role", data);
     },
     onSuccess: () => {
       push("/dashboard/role"); // ✅ Redirection après succès
       toast.success("role créé avec succès !");
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Erreur lors de la création de role :", error);
       toast.error("Échec de la création de role. Veuillez réessayer.");
     },
@@ -27,10 +26,10 @@ export default function App() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<{ namear: string; namefr: string }>();
 
-  const onSubmit = async (data: any) => {
-    mutate(data); // Envoi de l'objet avec la clé 'data'
+  const onSubmit = async (data: { namear: string; namefr: string }) => {
+    mutate(data);
   };
 
   console.log(watch("namefr")); // Watch input value by passing its name
