@@ -13,7 +13,7 @@ interface DecodedToken {
   id: string;
   email: string;
   role: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | null;
 }
 
 export function authenticate(
