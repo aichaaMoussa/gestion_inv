@@ -32,7 +32,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 export default function App({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { ...pageProps },
 }: AppProps) {
   const router = useRouter();
   const queryClient = new QueryClient();
@@ -49,7 +49,7 @@ export default function App({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider session={session}>
+      <SessionProvider session={pageProps.session}>
         <NextIntlClientProvider
           locale={router.locale}
           messages={pageProps.messages}

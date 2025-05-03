@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, Db } from "mongodb";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const uri = process.env.MONGODB_URI as string;
@@ -13,10 +13,7 @@ const clientPromise = client.connect();
 
 interface RequestWithDb extends NextApiRequest {
   dbClient: MongoClient;
-  db: {
-    collection: (name: string) => any;
-    [key: string]: any;
-  };
+  db: Db;
 }
 
 export default async function database(
