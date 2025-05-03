@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
+import { Column } from "react-table";
 
 interface Patient {
   _id: string;
@@ -45,7 +46,7 @@ const TablePage = () => {
     return response.data;
   });
 
-  const columns = React.useMemo(
+  const columns = React.useMemo<Column<Patient>[]>(
     () => [
       {
         Header: "nom",
@@ -69,7 +70,7 @@ const TablePage = () => {
       },
       {
         Header: "Actions",
-        accessor: "actions",
+        accessor: "_id",
         Cell: ({ row }: { row: { original: Patient } }) => (
           <div className="flex space-x-2">
             <Link
