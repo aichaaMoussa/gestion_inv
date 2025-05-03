@@ -1,4 +1,4 @@
-import { ChangeEvent, FC } from "react";
+import { ChangeEvent,  } from "react";
 import { UseFormRegister, FieldValues, Path } from "react-hook-form";
 
 interface InputProps<T extends FieldValues> {
