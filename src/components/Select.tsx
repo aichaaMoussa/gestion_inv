@@ -1,15 +1,15 @@
 import React from "react";
 
 interface SelectOption {
-  value: string | number;
+  value: string;
   label: string;
   disabled?: boolean;
 }
 
 interface SelectProps {
   options: SelectOption[];
-  value?: string | number;
-  onChange?: (value: string | number) => void;
+  value?: string | string[];
+  onChange?: (value: string | string[]) => void;
   placeholder?: string;
   isDisabled?: boolean;
   isMulti?: boolean;
@@ -32,6 +32,8 @@ const Select: React.FC<SelectProps> = ({
   errorMessage,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!onChange) return;
+    
     if (isMulti) {
       const selectedValues = Array.from(
         e.target.selectedOptions,
