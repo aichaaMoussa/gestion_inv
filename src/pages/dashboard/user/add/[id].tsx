@@ -14,6 +14,21 @@ import { useRouter } from "next/router";
 import Select from "@/components/Select";
 import { userShemas } from "@/schemas/schemas";
 
+interface UserFormData {
+  nom: string;
+  prenom: string;
+  nni: string;
+  phone: string;
+  roleId: string;
+  username: string;
+  password: string;
+}
+
+interface Role {
+  _id: string;
+  namefr: string;
+}
+
 export default function UpdateForm() {
   const queryClient = new QueryClient();
   const { query, push } = useRouter();
@@ -36,7 +51,7 @@ export default function UpdateForm() {
 
   const { mutate, isLoading } = useMutation({
     mutationKey: ["user"],
-    mutationFn: async (formData: any) => {
+    mutationFn: async (formData: UserFormData) => {
       console.log("Données envoyées:", formData);
       const res = await axios.put(`/api/user/${id}`, formData);
       return res.data;
@@ -51,13 +66,13 @@ export default function UpdateForm() {
   });
 
   // React Hook Form avec Zod Resolver
-  const methods = useForm({
+  const methods = useForm<UserFormData>({
     resolver: zodResolver(userShemas),
   });
 
   const { setValue, watch, handleSubmit, register, formState, reset } = methods;
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: UserFormData) => {
     console.log("✅ Formulaire soumis avec les données:", formData);
     mutate(formData);
   };
@@ -71,7 +86,7 @@ export default function UpdateForm() {
   });
 
   const roleOptions = roles?.roles
-    ? roles.roles.map((role: any) => ({
+    ? roles.roles.map((role: Role) => ({
         value: role._id,
         label: role.namefr,
       }))

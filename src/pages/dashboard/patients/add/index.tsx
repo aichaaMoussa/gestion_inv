@@ -3,15 +3,38 @@ import {
   QueryClient,
   QueryClientProvider,
   useMutation,
-  useQuery,
 } from "react-query";
 import axios from "axios";
-import Select from "@/components/Select";
 import Input from "@/components/Input";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import { PatientSchema } from "@/schemas/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Session } from "next-auth";
+
+// Extend the session type to include custom properties
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
+interface PatientFormData {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  nni: string;
+  adress: string;
+  telephone: string;
+  age: string;
+}
 
 const queryClient = new QueryClient();
 
@@ -20,36 +43,38 @@ export default function App() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<PatientFormData>({
+    resolver: zodResolver(PatientSchema)
+  });
   const { push } = useRouter();
   const { mutate } = useMutation({
-    mutationKey: ["user"],
-    mutationFn: async (data) => {
+    mutationKey: ["patient"],
+    mutationFn: async (data: PatientFormData) => {
       return axios.post("/api/patients", data);
     },
     onSuccess: () => {
-      push("/dashboard/patients"); // ✅ Redirection après succès
+      push("/dashboard/patients");
       toast.success("Patient créé avec succès !");
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Erreur lors de la création de patient :", error);
       toast.error("Échec de la création de patient. Veuillez réessayer.");
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: PatientFormData) => {
     console.log("Form data submitted:", data);
     mutate(data);
   };
-  const { data: session, status } = useSession(); // Vérifie le statut de la session
-  console.log("Session status:", status, "Session data:", session);
+
+  const { data: session } = useSession();
+  
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) {
+    if (session?.user?.id) {
       setValue("doctorId", session.user.id);
     }
-  }, [session, status, setValue]);
+  }, [session, setValue]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -67,8 +92,8 @@ export default function App() {
               label="Nom"
               id="firstName"
               name="firstName"
-              placeholder="Nom"
-              error={!!errors.nom}
+              placeholder="Enter nom"
+              error={errors.firstName ? { message: errors.firstName.message } : undefined}
               register={register}
             />
             <Input
@@ -76,8 +101,8 @@ export default function App() {
               label="Prenom"
               id="lastName"
               name="lastName"
-              placeholder="Prenom"
-              error={!!errors.prenom}
+              placeholder="Enter prenom"
+              error={errors.lastName ? { message: errors.lastName.message } : undefined}
               register={register}
             />
             <Input
@@ -86,34 +111,34 @@ export default function App() {
               id="nni"
               name="nni"
               placeholder="Enter NNI"
-              error={!!errors.nni}
+              error={errors.nni ? { message: errors.nni.message } : undefined}
               register={register}
             />
-             <Input
-              type="number"
-              label="telephone"
+            <Input
+              type="text"
+              label="Telephone"
               id="telephone"
               name="telephone"
               placeholder="Enter telephone"
-              error={!!errors.phone}
-              register={register}
-            /> 
-            <Input
-              type="text"
-              label="adress"
-              id="adress"
-              name="adress"
-              placeholder="Enter adress"
-              error={!!errors.nni}
+              error={errors.telephone ? { message: errors.telephone.message } : undefined}
               register={register}
             />
             <Input
-              type="number"
-              label="age"
+              type="text"
+              label="Adresse"
+              id="adress"
+              name="adress"
+              placeholder="Enter adresse"
+              error={errors.adress ? { message: errors.adress.message } : undefined}
+              register={register}
+            />
+            <Input
+              type="text"
+              label="Age"
               id="age"
               name="age"
-              placeholder="Enter adress"
-              error={!!errors.nni}
+              placeholder="Enter age"
+              error={errors.age ? { message: errors.age.message } : undefined}
               register={register}
             />
 

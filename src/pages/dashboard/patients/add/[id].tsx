@@ -11,9 +11,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import Select from "@/components/Select";
-import { PatientSchema, userShemas } from "@/schemas/schemas";
+import { PatientSchema } from "@/schemas/schemas";
 import { useSession } from "next-auth/react";
+import type { Session } from "next-auth";
 
 // Extend the session type to include custom properties
 declare module "next-auth" {
@@ -25,6 +25,21 @@ declare module "next-auth" {
       image?: string | null;
     }
   }
+}
+
+interface PatientFormData {
+  doctorId: string;
+  firstName: string;
+  lastName: string;
+  nni: string;
+  adress: string;
+  telephone: string;
+  age: string;
+}
+
+interface Role {
+  _id: string;
+  namefr: string;
 }
 
 export default function UpdateForm() {
@@ -49,7 +64,7 @@ export default function UpdateForm() {
 
   const { mutate, isLoading } = useMutation({
     mutationKey: ["patients"],
-    mutationFn: async (formData: any) => {
+    mutationFn: async (formData: PatientFormData) => {
       console.log("Données envoyées:", formData);
       const res = await axios.put(`/api/patients/${id}`, formData);
       return res.data;
@@ -63,13 +78,13 @@ export default function UpdateForm() {
     },
   });
 
-  const methods = useForm({
+  const methods = useForm<PatientFormData>({
     resolver: zodResolver(PatientSchema),
   });
 
-  const { setValue, watch, handleSubmit, register, formState, reset } = methods;
+  const { setValue, handleSubmit, register, formState, reset } = methods;
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = (formData: PatientFormData) => {
     console.log("✅ Formulaire soumis avec les données:", formData);
     mutate(formData);
   };
@@ -89,25 +104,24 @@ export default function UpdateForm() {
       }))
     : [];
 
-  const { data: session, status } = useSession();
-  console.log("Session status:", status, "Session data:", session);
-
+  const { data: session } = useSession();
+  
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) {
+    if (session?.user?.id) {
       setValue("doctorId", session.user.id);
     }
-  }, [session, status, setValue]);
+  }, [session, setValue]);
 
   useEffect(() => {
     if (data) {
-      console.log("Données utilisateur avant mise à jour:", data);
+      console.log("Données patient avant mise à jour:", data);
       reset();
       setValue("firstName", data?.firstName, { shouldValidate: true });
       setValue("lastName", data?.lastName, { shouldValidate: true });
       setValue("nni", data?.nni, { shouldValidate: true });
       setValue("telephone", data?.telephone, { shouldValidate: true });
-      setValue("adress", data?.adress || "", { shouldValidate: true });
-      setValue("age", data?.age || "", { shouldValidate: true });
+      setValue("adress", data?.adress, { shouldValidate: true });
+      setValue("age", data?.age, { shouldValidate: true });
     }
   }, [data, reset, setValue]);
 
@@ -151,8 +165,8 @@ export default function UpdateForm() {
             register={register}
           />
           <Input
-            type="number"
-            label="telephone"
+            type="text"
+            label="Telephone"
             id="telephone"
             name="telephone"
             placeholder="Enter telephone"
@@ -161,16 +175,16 @@ export default function UpdateForm() {
           />
           <Input
             type="text"
-            label="adress"
+            label="Adresse"
             id="adress"
             name="adress"
-            placeholder="Enter adress"
+            placeholder="Enter adresse"
             error={errors.adress ? { message: errors.adress.message } : undefined}
             register={register}
           />
           <Input
-            type="number"
-            label="age"
+            type="text"
+            label="Age"
             id="age"
             name="age"
             placeholder="Enter age"
