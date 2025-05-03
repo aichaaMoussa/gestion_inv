@@ -49,6 +49,16 @@ interface Consultation {
   updatedAt: string;
 }
 
+interface ApiError {
+  response?: {
+    status: number;
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const ConsultationPage: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,20 +67,21 @@ const ConsultationPage: React.FC = () => {
 
   const { data, isLoading, error } = useQuery(['consultations'], async () => {
     try {
-      const session = await axios.get("/api/auth/session"); // Récupérer la session
-      const userId = session.data?.user?.id; // Extraire l'ID de l'utilisateur connecté
+      const session = await axios.get("/api/auth/session");
+      const userId = session.data?.user?.id;
 
       if (!userId) {
         throw new Error("Utilisateur non authentifié");
       }
 
       const response = await axios.get("/api/consultations", {
-        params: { user: userId }, // Envoyer l'ID de l'utilisateur
+        params: { user: userId },
       });
       console.log("dataconsultation",response.data)
       return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 401) {
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response?.status === 401) {
         toast.error('Session expirée. Veuillez vous reconnecter.');
         router.push('/login');
         return;

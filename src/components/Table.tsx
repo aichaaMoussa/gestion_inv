@@ -2,7 +2,12 @@ import React from "react";
 import { useTable, usePagination } from "react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Icônes pour pagination
 
-const Table = ({ columns, data }) => {
+interface TableProps {
+  columns: any[];
+  data: any[];
+}
+
+const Table: React.FC<TableProps> = ({ columns, data }) => {
   const {
     getTableProps,
     getTableBodyProps,
@@ -31,10 +36,11 @@ const Table = ({ columns, data }) => {
       {/* Tableau */}
       <table {...getTableProps()} className="w-full border-collapse">
         <thead className="bg-sky-50 border-b-2 border-gray-400">
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
+          {headerGroups.map((headerGroup, headerGroupIndex) => (
+            <tr key={`header-group-${headerGroupIndex}`} {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column, columnIndex) => (
                 <th
+                  key={`header-${columnIndex}`}
                   {...column.getHeaderProps()}
                   className="px-4 py-3 text-left text-sm font-semibold text-gray-700"
                 >
@@ -45,15 +51,17 @@ const Table = ({ columns, data }) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map((row) => {
+          {page.map((row, rowIndex) => {
             prepareRow(row);
             return (
               <tr
+                key={`row-${rowIndex}`}
                 {...row.getRowProps()}
                 className="border-b border-gray-300 hover:bg-gray-50"
               >
-                {row.cells.map((cell) => (
+                {row.cells.map((cell, cellIndex) => (
                   <td
+                    key={`cell-${rowIndex}-${cellIndex}`}
                     {...cell.getCellProps()}
                     className="px-4 py-3 text-sm text-gray-600"
                   >
@@ -77,7 +85,7 @@ const Table = ({ columns, data }) => {
             className="p-1 text-sm border rounded"
           >
             {[5, 10, 15, 20].map((size) => (
-              <option key={size} value={size}>
+              <option key={`size-${size}`} value={size}>
                 {size}
               </option>
             ))}
@@ -96,7 +104,7 @@ const Table = ({ columns, data }) => {
 
           {pageOptions.map((page, index) => (
             <button
-              key={index}
+              key={`page-${index}`}
               onClick={() => gotoPage(page)}
               className={`px-3 py-1 text-sm rounded ${
                 pageIndex === page
