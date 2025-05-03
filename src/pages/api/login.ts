@@ -42,19 +42,23 @@ export default async function handler(
 
     // Générer un token JWT avec l'ID correct
     const token = jwt.sign(
-      { id: user._id.toString(), username: user.username, roleId: user.roleId }, // 🔥 Ajout de `id`
-      JWT_SECRET,
+      { 
+        id: user._id.toString(), 
+        username: user.username, 
+        roleId: user.roleId 
+      },
+      JWT_SECRET as string,
       { expiresIn: "1h" }
     );
 
-    // Retourne bien l'ID dans la réponse
-    res
-      .status(200)
-      .json({ message: "Connexion réussie", token, id: user._id.toString() });
-
-    res.status(200).json({ message: "Connexion réussie", token });
+    res.status(200).json({
+      token,
+      id: user._id.toString(),
+      username: user.username,
+      roleId: user.roleId
+    });
   } catch (error) {
-    console.error("Erreur lors de la connexion :", error);
-    res.status(500).json({ message: "Erreur interne du serveur" });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 }
