@@ -3,18 +3,24 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectToDb } from "@/lib/mongoose";
 
-interface User extends NextAuthUser {
-  username: string;
-  roleId: string;
+// Extend the built-in session types
+declare module "next-auth" {
+  interface User {
+    id: string;
+    username: string;
+    roleId: string;
+  }
+
+  interface Session extends DefaultSession {
+    user: User;
+  }
 }
 
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      username: string;
-      roleId: string;
-    }
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    username: string;
+    roleId: string;
   }
 }
 
@@ -68,17 +74,19 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.username = (user as User).username;
-        token.roleId = (user as User).roleId;
+        token.username = user.username;
+        token.roleId = user.roleId;
       }
       return token;
     },
 
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.username = token.username as string;
-        session.user.roleId = token.roleId as string;
+        session.user = {
+          id: token.id,
+          username: token.username,
+          roleId: token.roleId
+        };
       }
       return session;
     },
