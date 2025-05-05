@@ -9,6 +9,27 @@ interface User extends NextAuthUser {
   roleId: string;
 }
 
+// Fonction pour obtenir l'URL de base
+const getBaseUrl = () => {
+  if (typeof window !== "undefined") {
+    // Browser should use relative path
+    return "";
+  }
+  
+  if (process.env.VERCEL_URL) {
+    // Reference for vercel.com
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  if (process.env.NEXTAUTH_URL) {
+    // Reference for custom domain
+    return process.env.NEXTAUTH_URL;
+  }
+  
+  // Assume localhost
+  return "http://localhost:3000";
+};
+
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -26,7 +47,7 @@ export const authOptions: AuthOptions = {
 
         try {
           console.log("Attempting to authenticate user:", credentials.username);
-          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          const baseUrl = getBaseUrl();
           console.log("Using base URL:", baseUrl);
 
           const res = await axios.post(
@@ -34,6 +55,11 @@ export const authOptions: AuthOptions = {
             {
               username: credentials.username,
               password: credentials.password
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
             }
           );
           
@@ -56,7 +82,8 @@ export const authOptions: AuthOptions = {
           console.error("Authentication error:", {
             message: error.message,
             response: error.response?.data,
-            status: error.response?.status
+            status: error.response?.status,
+            url: error.config?.url
           });
           
           if (error.response?.status === 401) {
