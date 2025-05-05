@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import { Pencil, Trash } from "lucide-react";
 import { Column } from "react-table";
+import { CircularProgress } from "@mui/material";
 
 interface Role {
   _id: string;
@@ -27,7 +28,7 @@ const TablePage = () => {
     },
   });
 
-  const { data } = useQuery(["role"], async () => {
+  const { data, isLoading, error } = useQuery(["role"], async () => {
     const response = await axios.get("/api/role");
     return response.data;
   });
@@ -65,6 +66,52 @@ const TablePage = () => {
     ],
     [deleteMutation]
   );
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Gestion des roles</h1>
+        </div>
+        <div className="flex justify-center items-center h-[50vh] flex-col gap-4">
+          <CircularProgress size={60} />
+          <p className="text-lg">Chargement des rôles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Gestion des roles</h1>
+        </div>
+        <div className="flex justify-center items-center h-[50vh]">
+          <p className="text-red-500">Erreur lors du chargement des rôles</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data?.roles?.length) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Gestion des roles</h1>
+          <Link href="/dashboard/role/add">
+            <button className="w-[146px] h-[47px] bg-sky-800 border-[0.6px] border-[#0281B4] rounded-[2px] font-medium shadow-md hover:bg-[#0281B4] text-white transition">
+              Ajouter
+            </button>
+          </Link>
+        </div>
+        <div className="flex justify-center items-center h-[50vh] flex-col gap-2">
+          <p className="text-xl text-gray-600">Aucun rôle trouvé</p>
+          <p className="text-gray-500">Commencez par ajouter un nouveau rôle</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">

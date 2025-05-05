@@ -6,6 +6,7 @@ import React from "react";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
 import { Column } from "react-table";
+import { CircularProgress } from "@mui/material";
 
 interface User {
   _id: string;
@@ -34,12 +35,10 @@ const TablePage = () => {
     },
   });
 
-  const { data } = useQuery<UserResponse>(["user"], async () => {
+  const { data, isLoading, error } = useQuery<UserResponse>(["user"], async () => {
     const response = await axios.get("/api/user");
     return response.data;
   });
-
-  console.log("data", data);
 
   const columns = React.useMemo<Column<User>[]>(
     () => [
@@ -82,6 +81,52 @@ const TablePage = () => {
     ],
     []
   );
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Gestion des utilisateurs</h1>
+        </div>
+        <div className="flex justify-center items-center h-[50vh] flex-col gap-4">
+          <CircularProgress size={60} />
+          <p className="text-lg">Chargement des utilisateurs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Gestion des utilisateurs</h1>
+        </div>
+        <div className="flex justify-center items-center h-[50vh]">
+          <p className="text-red-500">Erreur lors du chargement des utilisateurs</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data?.users?.length) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Gestion des utilisateurs</h1>
+          <Link href="/dashboard/user/add">
+            <button className="w-[146px] h-[47px] bg-sky-800 border-[0.6px] border-[#0281B4] rounded-[2px] font-medium shadow-md hover:bg-[#0281B4] text-white transition">
+              Ajouter
+            </button>
+          </Link>
+        </div>
+        <div className="flex justify-center items-center h-[50vh] flex-col gap-2">
+          <p className="text-xl text-gray-600">Aucun utilisateur trouvé</p>
+          <p className="text-gray-500">Commencez par ajouter un nouvel utilisateur</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">

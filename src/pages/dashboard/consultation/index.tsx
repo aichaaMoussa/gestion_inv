@@ -17,6 +17,7 @@ import {
   IconButton,
   TextField,
   InputAdornment,
+  CircularProgress,
 } from '@mui/material';
 import { Search as SearchIcon, Print as PrintIcon, Visibility as VisibilityIcon, Edit as EditIcon } from '@mui/icons-material';
 import { useQuery } from 'react-query';
@@ -77,7 +78,6 @@ const ConsultationPage: React.FC = () => {
       const response = await axios.get("/api/consultations", {
         params: { user: userId },
       });
-      console.log("dataconsultation",response.data)
       return response.data;
     } catch (error: unknown) {
       const apiError = error as ApiError;
@@ -108,8 +108,9 @@ const ConsultationPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography>Chargement...</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: 2 }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6">Chargement des consultations...</Typography>
       </Box>
     );
   }
@@ -119,6 +120,31 @@ const ConsultationPage: React.FC = () => {
     return (
       <Box sx={{ p: 3 }}>
         <Typography color="error">Erreur lors de la récupération des consultations</Typography>
+      </Box>
+    );
+  }
+
+  if (!filteredConsultations.length) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          Gestion des Consultations
+        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <Typography variant="h6" color="textSecondary">
+            Aucune consultation trouvée
+          </Typography>
+          <Typography color="textSecondary">
+            {searchTerm ? 'Aucun résultat pour votre recherche' : 'Commencez par ajouter une nouvelle consultation'}
+          </Typography>
+        </Box>
       </Box>
     );
   }
