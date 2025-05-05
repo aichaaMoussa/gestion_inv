@@ -2,7 +2,6 @@ import NextAuth, { AuthOptions, SessionStrategy, User as NextAuthUser, DefaultSe
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectToDb } from "@/lib/mongoose";
-import { JWT } from "next-auth/jwt";
 
 interface User extends NextAuthUser {
   username: string;
@@ -30,42 +29,30 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          console.log("Missing credentials");
           throw new Error('Missing credentials');
         }
 
         try {
-          console.log("Attempting to authenticate user:", credentials.username);
           const db = await connectToDb();
-          console.log("Database connected successfully");
-
           const user = await db.collection("users").findOne({ username: credentials.username });
-          console.log("User lookup result:", user ? "User found" : "User not found");
 
           if (!user) {
-            console.log("User not found:", credentials.username);
             throw new Error('Invalid credentials');
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-          console.log("Password validation result:", isPasswordValid ? "Valid" : "Invalid");
 
           if (!isPasswordValid) {
-            console.log("Invalid password for user:", credentials.username);
             throw new Error('Invalid credentials');
           }
 
-          console.log("Login successful for user:", credentials.username);
           return {
             id: user._id.toString(),
             username: user.username,
             roleId: user.roleId
           };
-        } catch (error: any) {
-          console.error("Authentication error:", {
-            message: error.message,
-            stack: error.stack
-          });
+        } catch (error) {
+          console.error("Authentication error:", error);
           throw new Error('Invalid credentials');
         }
       },
@@ -80,7 +67,6 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log("JWT Callback - Adding user data to token");
         token.id = user.id;
         token.username = (user as User).username;
         token.roleId = (user as User).roleId;
@@ -90,7 +76,6 @@ export const authOptions: AuthOptions = {
 
     async session({ session, token }) {
       if (token) {
-        console.log("Session Callback - Adding token data to session");
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.roleId = token.roleId as string;
@@ -104,6 +89,7 @@ export const authOptions: AuthOptions = {
     error: "/login",
   },
 
+  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 };
 
