@@ -16,6 +16,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   console.log("Login API called with method:", req.method);
+  console.log("Request headers:", req.headers);
   
   if (req.method !== "POST") {
     console.log("Method not allowed:", req.method);
@@ -41,6 +42,7 @@ export default async function handler(
     console.log("User lookup result:", user ? "User found" : "User not found");
 
     if (!user) {
+      console.log("User not found:", username);
       return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
 
@@ -48,6 +50,7 @@ export default async function handler(
     console.log("Password validation result:", isPasswordValid ? "Valid" : "Invalid");
 
     if (!isPasswordValid) {
+      console.log("Invalid password for user:", username);
       return res.status(401).json({ message: "Mot de passe incorrect" });
     }
 
@@ -72,7 +75,8 @@ export default async function handler(
   } catch (error) {
     console.error("Login error details:", {
       error: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
+      headers: req.headers
     });
     res.status(500).json({ 
       message: "Erreur serveur",

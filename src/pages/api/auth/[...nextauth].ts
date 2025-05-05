@@ -1,34 +1,23 @@
-import NextAuth, { AuthOptions, SessionStrategy, User as NextAuthUser } from "next-auth";
+import NextAuth, { AuthOptions, SessionStrategy, User as NextAuthUser, DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import axios from "axios";
+import bcrypt from "bcryptjs";
+import { connectToDb } from "@/lib/mongoose";
 import { JWT } from "next-auth/jwt";
 
 interface User extends NextAuthUser {
   username: string;
-  token: string;
   roleId: string;
 }
 
-// Fonction pour obtenir l'URL de base
-const getBaseUrl = () => {
-  if (typeof window !== "undefined") {
-    // Browser should use relative path
-    return "";
+declare module "next-auth" {
+  interface Session extends DefaultSession {
+    user: {
+      id: string;
+      username: string;
+      roleId: string;
+    }
   }
-  
-  if (process.env.VERCEL_URL) {
-    // Reference for vercel.com
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  
-  if (process.env.NEXTAUTH_URL) {
-    // Reference for custom domain
-    return process.env.NEXTAUTH_URL;
-  }
-  
-  // Assume localhost
-  return "http://localhost:3000";
-};
+}
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -47,50 +36,37 @@ export const authOptions: AuthOptions = {
 
         try {
           console.log("Attempting to authenticate user:", credentials.username);
-          const baseUrl = getBaseUrl();
-          console.log("Using base URL:", baseUrl);
+          const db = await connectToDb();
+          console.log("Database connected successfully");
 
-          const res = await axios.post(
-            `${baseUrl}/api/login`,
-            {
-              username: credentials.username,
-              password: credentials.password
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-          
-          console.log("Login API response status:", res.status);
-          const user = res.data;
+          const user = await db.collection("users").findOne({ username: credentials.username });
+          console.log("User lookup result:", user ? "User found" : "User not found");
 
-          if (user && user.token) {
-            console.log("Login successful for user:", credentials.username);
-            return {
-              id: user.id,
-              username: credentials.username,
-              token: user.token,
-              roleId: user.roleId
-            };
+          if (!user) {
+            console.log("User not found:", credentials.username);
+            throw new Error('Invalid credentials');
           }
-          
-          console.log("No user data or token in response");
-          return null;
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          console.log("Password validation result:", isPasswordValid ? "Valid" : "Invalid");
+
+          if (!isPasswordValid) {
+            console.log("Invalid password for user:", credentials.username);
+            throw new Error('Invalid credentials');
+          }
+
+          console.log("Login successful for user:", credentials.username);
+          return {
+            id: user._id.toString(),
+            username: user.username,
+            roleId: user.roleId
+          };
         } catch (error: any) {
           console.error("Authentication error:", {
             message: error.message,
-            response: error.response?.data,
-            status: error.response?.status,
-            url: error.config?.url
+            stack: error.stack
           });
-          
-          if (error.response?.status === 401) {
-            throw new Error('Invalid credentials');
-          }
-          
-          throw new Error(error.response?.data?.message || 'Authentication failed');
+          throw new Error('Invalid credentials');
         }
       },
     }),
@@ -102,30 +78,27 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         console.log("JWT Callback - Adding user data to token");
         token.id = user.id;
         token.username = (user as User).username;
-        token.accessToken = (user as User).token;
         token.roleId = (user as User).roleId;
       }
       return token;
     },
 
-    async session({ session, token }: { session: any; token: JWT }) {
+    async session({ session, token }) {
       if (token) {
         console.log("Session Callback - Adding token data to session");
-        session.user.id = token.id;
-        session.user.username = token.username;
-        session.accessToken = token.accessToken;
-        session.user.roleId = token.roleId;
+        session.user.id = token.id as string;
+        session.user.username = token.username as string;
+        session.user.roleId = token.roleId as string;
       }
       return session;
     },
   },
 
-  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
     error: "/login",
