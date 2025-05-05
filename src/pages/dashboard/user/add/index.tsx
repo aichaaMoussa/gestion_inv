@@ -133,8 +133,8 @@ export default function App() {
             <Input
               type="text"
               label="Email"
-              id="email"
-              name="email"
+              id="username"
+              name="username"
               placeholder="Enter email"
               error={errors.email ? { message: errors.email.message } : undefined}
               register={register}

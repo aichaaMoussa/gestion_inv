@@ -23,7 +23,7 @@ export const authOptions: AuthOptions = {
 
         try {
           const res = await axios.post(
-            "http://localhost:3000/api/login",
+            "/api/login",
             {
               username: credentials.username,
               password: credentials.password
