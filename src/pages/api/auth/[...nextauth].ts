@@ -20,11 +20,15 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
+          console.log("Missing credentials");
           throw new Error('Missing credentials');
         }
 
         try {
+          console.log("Attempting to authenticate user:", credentials.username);
           const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          console.log("Using base URL:", baseUrl);
+
           const res = await axios.post(
             `${baseUrl}/api/login`,
             {
@@ -32,10 +36,12 @@ export const authOptions: AuthOptions = {
               password: credentials.password
             }
           );
+          
+          console.log("Login API response status:", res.status);
           const user = res.data;
 
           if (user && user.token) {
-            console.log("Login Success - User:", user);
+            console.log("Login successful for user:", credentials.username);
             return {
               id: user.id,
               username: credentials.username,
@@ -43,9 +49,20 @@ export const authOptions: AuthOptions = {
               roleId: user.roleId
             };
           }
+          
+          console.log("No user data or token in response");
           return null;
         } catch (error: any) {
-          console.error("Login error:", error.response?.data || error.message);
+          console.error("Authentication error:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+          });
+          
+          if (error.response?.status === 401) {
+            throw new Error('Invalid credentials');
+          }
+          
           throw new Error(error.response?.data?.message || 'Authentication failed');
         }
       },
@@ -60,6 +77,7 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user, account }) {
       if (user) {
+        console.log("JWT Callback - Adding user data to token");
         token.id = user.id;
         token.username = (user as User).username;
         token.accessToken = (user as User).token;
@@ -70,6 +88,7 @@ export const authOptions: AuthOptions = {
 
     async session({ session, token }: { session: any; token: JWT }) {
       if (token) {
+        console.log("Session Callback - Adding token data to session");
         session.user.id = token.id;
         session.user.username = token.username;
         session.accessToken = token.accessToken;

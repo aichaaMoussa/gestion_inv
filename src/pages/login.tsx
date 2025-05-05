@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
 interface LoginFormData {
   username: string;
@@ -11,61 +12,91 @@ function Login() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>();
 
   const router = useRouter();
 
   const onSubmit = async (data: LoginFormData) => {
-    const res = await signIn("credentials", {
-      redirect: false, // Ne pas rediriger immédiatement
-      username: data.username,
-      password: data.password,
-    });
+    try {
+      console.log("Attempting login with username:", data.username);
+      
+      const res = await signIn("credentials", {
+        redirect: false,
+        username: data.username,
+        password: data.password,
+        callbackUrl: "/dashboard"
+      });
 
-    if (res?.error) {
-      alert("Invalid credentials");
-    } else {
-      router.push("/dashboard");
+      console.log("SignIn response:", res);
+
+      if (res?.error) {
+        console.error("Login error:", res.error);
+        toast.error(res.error);
+      } else if (res?.ok) {
+        console.log("Login successful, redirecting to dashboard");
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Une erreur est survenue lors de la connexion");
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 p-4 max-w-md mx-auto"
-    >
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          className="block w-full p-2 border rounded"
-          {...register("username", { required: true })}
-        />
-        {errors.username && (
-          <span className="text-red-500">Username is required</span>
-        )}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Connexion
+          </h2>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="username" className="sr-only">
+                Nom d'utilisateur
+              </label>
+              <input
+                id="username"
+                type="text"
+                {...register("username", { required: "Le nom d'utilisateur est requis" })}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Nom d'utilisateur"
+              />
+              {errors.username && (
+                <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Mot de passe
+              </label>
+              <input
+                id="password"
+                type="password"
+                {...register("password", { required: "Le mot de passe est requis" })}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Mot de passe"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {isSubmitting ? "Connexion en cours..." : "Se connecter"}
+            </button>
+          </div>
+        </form>
       </div>
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          className="block w-full p-2 border rounded"
-          {...register("password", { required: true })}
-        />
-        {errors.password && (
-          <span className="text-red-500">Password is required</span>
-        )}
-      </div>
-      <button
-        type="submit"
-        className="bg-blue-500 text-white p-2 rounded w-full"
-      >
-        Login
-      </button>
-    </form>
+    </div>
   );
 }
 
