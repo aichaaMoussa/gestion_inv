@@ -9,13 +9,24 @@ import "../styles/globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Liste des routes publiques qui ne nécessitent pas d'authentification
+const publicRoutes = ['/login', '/register', '/forgot-password'];
+
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login"); // 🔥 Redirection si non authentifié
+    // Vérifier si la route actuelle est une route publique
+    const isPublicRoute = publicRoutes.includes(router.pathname);
+
+    if (status === "unauthenticated" && !isPublicRoute) {
+      router.push("/login");
+    }
+
+    // Si l'utilisateur est authentifié et essaie d'accéder à la page de login
+    if (status === "authenticated" && router.pathname === "/login") {
+      router.push("/dashboard");
     }
   }, [status, router]);
 

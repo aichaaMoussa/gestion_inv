@@ -24,6 +24,10 @@ declare module "next-auth/jwt" {
   }
 }
 
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error("NEXTAUTH_SECRET is not defined in environment variables");
+}
+
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -35,31 +39,42 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          throw new Error('Missing credentials');
+          throw new Error('Veuillez remplir tous les champs');
         }
 
         try {
           const db = await connectToDb();
-          const user = await db.collection("users").findOne({ username: credentials.username });
+          
+          // Vérifier si l'utilisateur existe
+          const user = await db.collection("users").findOne({ 
+            username: credentials.username.toLowerCase().trim() 
+          });
 
           if (!user) {
-            throw new Error('Invalid credentials');
+            throw new Error('Utilisateur non trouvé');
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          // Vérifier si le mot de passe est correct
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
 
           if (!isPasswordValid) {
-            throw new Error('Invalid credentials');
+            throw new Error('Mot de passe incorrect');
           }
 
+          // Retourner les informations de l'utilisateur
           return {
             id: user._id.toString(),
             username: user.username,
             roleId: user.roleId
           };
         } catch (error) {
-          console.error("Authentication error:", error);
-          throw new Error('Invalid credentials');
+          if (error instanceof Error) {
+            throw new Error(error.message);
+          }
+          throw new Error('Une erreur est survenue lors de l\'authentification');
         }
       },
     }),
