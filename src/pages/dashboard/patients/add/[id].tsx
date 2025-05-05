@@ -14,18 +14,6 @@ import { useRouter } from "next/router";
 import { PatientSchema } from "@/schemas/schemas";
 import { useSession } from "next-auth/react";
 
-// Extend the session type to include custom properties
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-    }
-  }
-}
-
 interface PatientFormData {
   doctorId: string;
   firstName: string;
