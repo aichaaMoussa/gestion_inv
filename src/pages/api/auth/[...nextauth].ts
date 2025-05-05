@@ -6,11 +6,13 @@ import { JWT } from "next-auth/jwt";
 interface User extends NextAuthUser {
   username: string;
   token: string;
+  roleId: string;
 }
 
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text" },
@@ -38,12 +40,13 @@ export const authOptions: AuthOptions = {
               id: user.id,
               username: credentials.username,
               token: user.token,
+              roleId: user.roleId
             };
           }
           return null;
         } catch (error: any) {
           console.error("Login error:", error.response?.data || error.message);
-          return null;
+          throw new Error(error.response?.data?.message || 'Authentication failed');
         }
       },
     }),
@@ -51,6 +54,7 @@ export const authOptions: AuthOptions = {
 
   session: {
     strategy: "jwt" as SessionStrategy,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   callbacks: {
@@ -59,6 +63,7 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.username = (user as User).username;
         token.accessToken = (user as User).token;
+        token.roleId = (user as User).roleId;
       }
       return token;
     },
@@ -68,6 +73,7 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id;
         session.user.username = token.username;
         session.accessToken = token.accessToken;
+        session.user.roleId = token.roleId;
       }
       return session;
     },
@@ -76,7 +82,10 @@ export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
+    error: "/login",
   },
+
+  debug: process.env.NODE_ENV === "development",
 };
 
 export default NextAuth(authOptions);
