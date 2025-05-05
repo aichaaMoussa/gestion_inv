@@ -22,8 +22,9 @@ export const authOptions: AuthOptions = {
         }
 
         try {
+          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
           const res = await axios.post(
-            "/api/login",
+            `${baseUrl}/api/login`,
             {
               username: credentials.username,
               password: credentials.password

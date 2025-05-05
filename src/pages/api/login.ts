@@ -15,27 +15,38 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  console.log("Login API called with method:", req.method);
+  
   if (req.method !== "POST") {
+    console.log("Method not allowed:", req.method);
     return res.status(405).json({ message: "Méthode non autorisée" });
   }
 
   const { username, password } = req.body;
+  console.log("Login attempt for username:", username);
 
   if (!username || !password) {
+    console.log("Missing credentials");
     return res
       .status(400)
       .json({ message: "Nom d'utilisateur et mot de passe requis" });
   }
 
   try {
+    console.log("Connecting to database...");
     const db = await connectToDb();
+    console.log("Database connected successfully");
+
     const user = await db.collection("users").findOne({ username });
+    console.log("User lookup result:", user ? "User found" : "User not found");
 
     if (!user) {
       return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("Password validation result:", isPasswordValid ? "Valid" : "Invalid");
+
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Mot de passe incorrect" });
     }
@@ -51,6 +62,7 @@ export default async function handler(
       { expiresIn: "1h" }
     );
 
+    console.log("Login successful for user:", username);
     res.status(200).json({
       token,
       id: user._id.toString(),
@@ -58,7 +70,13 @@ export default async function handler(
       roleId: user.roleId
     });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("Login error details:", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    res.status(500).json({ 
+      message: "Erreur serveur",
+      details: process.env.NODE_ENV === 'development' ? error instanceof Error ? error.message : 'Unknown error' : undefined
+    });
   }
 }
