@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 interface LoginFormData {
   username: string;
@@ -16,6 +17,13 @@ function Login() {
   } = useForm<LoginFormData>();
 
   const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -25,7 +33,6 @@ function Login() {
         redirect: false,
         username: data.username,
         password: data.password,
-        callbackUrl: "/dashboard"
       });
 
       console.log("SignIn response:", res);
@@ -35,13 +42,18 @@ function Login() {
         toast.error(res.error);
       } else if (res?.ok) {
         console.log("Login successful, redirecting to dashboard");
-        router.push("/dashboard");
+        router.replace("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Une erreur est survenue lors de la connexion");
     }
   };
+
+  // Si l'utilisateur est déjà authentifié, ne pas afficher la page de login
+  if (status === "authenticated") {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
