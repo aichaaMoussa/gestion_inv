@@ -3,16 +3,8 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    // Log pour debug
-    // @ts-ignore
-    console.log("[Middleware] Path:", req.nextUrl.pathname, "Token:", req.nextauth?.token);
-
     // Si l'utilisateur est authentifié et essaie d'accéder à la page de login
     if (req.nextUrl.pathname === "/login") {
-      const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
-      if (callbackUrl && callbackUrl !== "/login") {
-        return NextResponse.redirect(new URL(callbackUrl, req.url));
-      }
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     return NextResponse.next();
@@ -20,8 +12,6 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Log pour debug
-        console.log("[Middleware][Authorized] Path:", req.nextUrl.pathname, "Token:", token);
         // Toujours autoriser la page de login
         if (req.nextUrl.pathname === "/login") {
           return true;
