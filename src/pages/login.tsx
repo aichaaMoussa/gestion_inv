@@ -18,12 +18,13 @@ function Login() {
 
   const router = useRouter();
   const { data: session, status } = useSession();
+  const callbackUrl = router.query.callbackUrl as string || "/dashboard";
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/dashboard");
+      router.replace(callbackUrl);
     }
-  }, [status, router]);
+  }, [status, router, callbackUrl]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -33,6 +34,7 @@ function Login() {
         redirect: false,
         username: data.username,
         password: data.password,
+        callbackUrl: callbackUrl
       });
 
       console.log("SignIn response:", res);
@@ -41,8 +43,8 @@ function Login() {
         console.error("Login error:", res.error);
         toast.error(res.error);
       } else if (res?.ok) {
-        console.log("Login successful, redirecting to dashboard");
-        router.replace("/dashboard");
+        console.log("Login successful, redirecting to:", callbackUrl);
+        router.replace(callbackUrl);
       }
     } catch (error) {
       console.error("Login error:", error);

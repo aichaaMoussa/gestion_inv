@@ -8,10 +8,7 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token }) => {
-        if (!token) {
-          return false;
-        }
-        return true;
+        return !!token;
       },
     },
     pages: {
@@ -25,12 +22,13 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - login (login page)
+     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - login page
      */
-    "/((?!login|_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|public|login).*)",
   ],
 }; 
