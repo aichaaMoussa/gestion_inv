@@ -3,11 +3,20 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    // Si l'utilisateur est authentifié et essaie d'accéder à la page de login
+    if (req.nextUrl.pathname === "/login") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
     return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token }) => {
+      authorized: ({ token, req }) => {
+        // Si l'utilisateur est sur la page de login, toujours autoriser
+        if (req.nextUrl.pathname === "/login") {
+          return true;
+        }
+        // Pour les autres pages, vérifier le token
         return !!token;
       },
     },
@@ -27,8 +36,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
-     * - login page
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|public|login).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|public).*)",
   ],
 }; 

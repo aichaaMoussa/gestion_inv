@@ -86,7 +86,7 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -105,6 +105,14 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
+
+    async redirect({ url, baseUrl }) {
+      // Permettre les redirections vers des URLs relatives
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Permettre les redirections vers le même domaine
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
 
   pages: {
@@ -114,6 +122,17 @@ export const authOptions: AuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true
+      }
+    }
+  }
 };
 
 export default NextAuth(authOptions);
