@@ -28,8 +28,6 @@ function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log("Attempting login with username:", data.username);
-      
       const res = await signIn("credentials", {
         redirect: false,
         username: data.username,
@@ -37,22 +35,16 @@ function Login() {
         callbackUrl: callbackUrl
       });
 
-      console.log("SignIn response:", res);
-
       if (res?.error) {
-        console.error("Login error:", res.error);
         toast.error(res.error);
       } else if (res?.ok) {
-        console.log("Login successful, redirecting to:", callbackUrl);
         router.replace(callbackUrl);
       }
     } catch (error) {
-      console.error("Login error:", error);
       toast.error("Une erreur est survenue lors de la connexion");
     }
   };
 
-  // Si l'utilisateur est déjà authentifié, ne pas afficher la page de login
   if (status === "authenticated") {
     return null;
   }

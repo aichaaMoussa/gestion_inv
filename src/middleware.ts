@@ -8,7 +8,10 @@ export default withAuth(
 
     // Si l'utilisateur est authentifié et essaie d'accéder à la page de login
     if (req.nextUrl.pathname === "/login") {
-      console.log("[Middleware] Authenticated user trying to access login page, redirecting to dashboard");
+      const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
+      if (callbackUrl) {
+        return NextResponse.redirect(new URL(callbackUrl, req.url));
+      }
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     console.log("[Middleware] Proceeding with request");
