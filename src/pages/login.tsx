@@ -46,7 +46,11 @@ function Login() {
   };
 
   if (status === "authenticated") {
-    return null;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Redirection...
+      </div>
+    );
   }
 
   return (
