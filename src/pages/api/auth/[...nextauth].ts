@@ -38,12 +38,16 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("[NextAuth] Authorize attempt with username:", credentials?.username);
+        
         if (!credentials?.username || !credentials?.password) {
+          console.log("[NextAuth] Missing credentials");
           throw new Error('Veuillez remplir tous les champs');
         }
 
         try {
           const db = await connectToDb();
+          console.log("[NextAuth] Database connected");
           
           // Vérifier si l'utilisateur existe
           const user = await db.collection("users").findOne({ 
@@ -51,8 +55,11 @@ export const authOptions: AuthOptions = {
           });
 
           if (!user) {
+            console.log("[NextAuth] User not found");
             throw new Error('Utilisateur non trouvé');
           }
+
+          console.log("[NextAuth] User found, verifying password");
 
           // Vérifier si le mot de passe est correct
           const isPasswordValid = await bcrypt.compare(
@@ -61,8 +68,11 @@ export const authOptions: AuthOptions = {
           );
 
           if (!isPasswordValid) {
+            console.log("[NextAuth] Invalid password");
             throw new Error('Mot de passe incorrect');
           }
+
+          console.log("[NextAuth] Authentication successful for user:", user.username);
 
           // Retourner les informations de l'utilisateur
           return {
@@ -71,6 +81,7 @@ export const authOptions: AuthOptions = {
             roleId: user.roleId
           };
         } catch (error) {
+          console.error("[NextAuth] Error during authentication:", error);
           if (error instanceof Error) {
             throw new Error(error.message);
           }
@@ -87,30 +98,49 @@ export const authOptions: AuthOptions = {
 
   callbacks: {
     async jwt({ token, user, account }) {
+      console.log("[NextAuth] JWT Callback - Token:", token);
+      console.log("[NextAuth] JWT Callback - User:", user);
+      
       if (user) {
         token.id = user.id;
         token.username = user.username;
         token.roleId = user.roleId;
+        console.log("[NextAuth] JWT Callback - Updated token:", token);
       }
       return token;
     },
 
     async session({ session, token }) {
+      console.log("[NextAuth] Session Callback - Session:", session);
+      console.log("[NextAuth] Session Callback - Token:", token);
+      
       if (token) {
         session.user = {
           id: token.id,
           username: token.username,
           roleId: token.roleId
         };
+        console.log("[NextAuth] Session Callback - Updated session:", session);
       }
       return session;
     },
 
     async redirect({ url, baseUrl }) {
+      console.log("[NextAuth] Redirect Callback - URL:", url);
+      console.log("[NextAuth] Redirect Callback - BaseURL:", baseUrl);
+      
       // Permettre les redirections vers des URLs relatives
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith("/")) {
+        const finalUrl = `${baseUrl}${url}`;
+        console.log("[NextAuth] Redirect Callback - Final URL:", finalUrl);
+        return finalUrl;
+      }
       // Permettre les redirections vers le même domaine
-      else if (new URL(url).origin === baseUrl) return url;
+      else if (new URL(url).origin === baseUrl) {
+        console.log("[NextAuth] Redirect Callback - Same domain URL:", url);
+        return url;
+      }
+      console.log("[NextAuth] Redirect Callback - Default to baseUrl:", baseUrl);
       return baseUrl;
     },
   },
@@ -121,7 +151,7 @@ export const authOptions: AuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Activer le mode debug en production
   cookies: {
     sessionToken: {
       name: `__Secure-next-auth.session-token`,
