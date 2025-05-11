@@ -25,7 +25,7 @@ function Login() {
   useEffect(() => {
     if (status === "authenticated") {
       console.log("User is authenticated, redirecting to:", callbackUrl);
-      router.replace(callbackUrl);
+      router.push(callbackUrl);
     }
   }, [status, router, callbackUrl]);
 
@@ -46,7 +46,7 @@ function Login() {
         toast.error(res.error);
       } else if (res?.ok) {
         console.log("Sign in successful, redirecting to:", callbackUrl);
-        router.replace(callbackUrl);
+        router.push(callbackUrl);
       }
     } catch (error) {
       console.error("Sign in error:", error);
@@ -54,7 +54,17 @@ function Login() {
     }
   };
 
-  
+  if (status === "authenticated") {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader className="animate-spin" size={24} />
+          <span>Redirection...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">

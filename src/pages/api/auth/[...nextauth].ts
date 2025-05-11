@@ -39,6 +39,19 @@ const hashPassword = async (password: string) => {
   return bcrypt.hash(password, salt);
 };
 
+// Fonction pour obtenir l'URL de base
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL.startsWith('http') 
+      ? process.env.NEXTAUTH_URL 
+      : `https://${process.env.NEXTAUTH_URL}`;
+  }
+  return 'http://localhost:3000';
+};
+
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -175,14 +188,20 @@ export const authOptions: AuthOptions = {
       }
       
       // Si l'URL est sur le même domaine, l'autoriser
-      if (new URL(url).origin === baseUrl) {
-        console.log("Redirecting to same domain:", url);
-        return url;
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.origin === baseUrl) {
+          console.log("Redirecting to same domain:", url);
+          return url;
+        }
+      } catch (e) {
+        console.error("Invalid URL:", url);
       }
       
       // Par défaut, rediriger vers le dashboard
-      console.log("Redirecting to default:", `${baseUrl}/dashboard`);
-      return `${baseUrl}/dashboard`;
+      const defaultUrl = `${baseUrl}/dashboard`;
+      console.log("Redirecting to default:", defaultUrl);
+      return defaultUrl;
     },
   },
 
