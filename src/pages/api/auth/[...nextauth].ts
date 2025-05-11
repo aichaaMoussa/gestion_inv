@@ -28,6 +28,17 @@ if (!process.env.NEXTAUTH_SECRET) {
   throw new Error("NEXTAUTH_SECRET is not defined in environment variables");
 }
 
+// Fonction pour vérifier si un hash est valide
+const isValidBcryptHash = (hash: string) => {
+  return /^\$2[aby]\$\d+\$/.test(hash);
+};
+
+// Fonction pour hasher un mot de passe
+const hashPassword = async (password: string) => {
+  const salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(password, salt);
+};
+
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -46,52 +57,75 @@ export const authOptions: AuthOptions = {
             throw new Error('Veuillez remplir tous les champs');
           }
 
+          const username = credentials.username.toLowerCase().trim();
+          const password = credentials.password.trim();
+
           console.log("Connecting to database...");
           const db = await connectToDb();
           console.log("Database connected successfully");
           
           // Vérifier si l'utilisateur existe
-          const user = await db.collection("users").findOne({ 
-            username: credentials.username.toLowerCase().trim() 
-          });
+          const user = await db.collection("users").findOne({ username });
+          console.log("User lookup result:", user ? "User found" : "User not found");
 
           if (!user) {
-            console.log("User not found:", credentials.username);
+            console.log("User not found:", username);
             throw new Error('Utilisateur non trouvé');
           }
 
-          console.log("User found, stored password hash:", user.password);
-          console.log("Attempting to verify password...");
-
-          // Vérifier si le mot de passe est correct
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password.trim(),
-            user.password
-          );
-
-          console.log("Password verification result:", isPasswordValid);
-
-          if (!isPasswordValid) {
-            console.log("Invalid password for user:", credentials.username);
-            throw new Error('Mot de passe incorrect');
+          if (!user.password) {
+            console.log("No password hash found for user");
+            throw new Error('Erreur de configuration du compte');
           }
 
-          console.log("Authentication successful for user:", user.username);
+          console.log("Stored password hash:", user.password);
 
-          // Retourner les informations de l'utilisateur
-          const userData = {
-            id: user._id.toString(),
-            username: user.username,
-            roleId: user.roleId
-          };
-          
-          console.log("Returning user data:", userData);
-          return userData;
+          // Si le mot de passe n'est pas hashé avec bcrypt, le hasher et mettre à jour la base de données
+          if (!isValidBcryptHash(user.password)) {
+            console.log("Password is not hashed with bcrypt, updating...");
+            const hashedPassword = await hashPassword(user.password);
+            await db.collection("users").updateOne(
+              { _id: user._id },
+              { $set: { password: hashedPassword } }
+            );
+            console.log("Password has been updated with bcrypt hash");
+            user.password = hashedPassword;
+          }
+
+          console.log("Attempting to verify password...");
+
+          try {
+            // Vérifier si le mot de passe est correct
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            console.log("Password verification result:", isPasswordValid);
+
+            if (!isPasswordValid) {
+              console.log("Invalid password for user:", username);
+              throw new Error('Mot de passe incorrect');
+            }
+
+            console.log("Authentication successful for user:", username);
+
+            // Retourner les informations de l'utilisateur
+            const userData = {
+              id: user._id.toString(),
+              username: user.username,
+              roleId: user.roleId
+            };
+            
+            console.log("Returning user data:", userData);
+            return userData;
+
+          } catch (bcryptError) {
+            console.error("Bcrypt comparison error:", bcryptError);
+            throw new Error('Erreur lors de la vérification du mot de passe');
+          }
 
         } catch (error) {
           console.error("Authentication error details:", {
             error: error instanceof Error ? error.message : 'Unknown error',
-            stack: error instanceof Error ? error.stack : undefined
+            stack: error instanceof Error ? error.stack : undefined,
+            type: error instanceof Error ? error.constructor.name : typeof error
           });
           
           if (error instanceof Error) {
@@ -145,7 +179,7 @@ export const authOptions: AuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true, // Enable debug mode to see more detailed logs
+  debug: true,
 };
 
 export default NextAuth(authOptions);
