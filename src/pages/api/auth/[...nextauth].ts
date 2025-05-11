@@ -38,16 +38,12 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("[NextAuth] Authorize attempt with username:", credentials?.username);
-        
-        if (!credentials?.username || !credentials?.password) {
-          console.log("[NextAuth] Missing credentials");
-          throw new Error('Veuillez remplir tous les champs');
-        }
-
         try {
+          if (!credentials?.username || !credentials?.password) {
+            throw new Error('Veuillez remplir tous les champs');
+          }
+
           const db = await connectToDb();
-          console.log("[NextAuth] Database connected");
           
           // Vérifier si l'utilisateur existe
           const user = await db.collection("users").findOne({ 
@@ -55,24 +51,18 @@ export const authOptions: AuthOptions = {
           });
 
           if (!user) {
-            console.log("[NextAuth] User not found");
             throw new Error('Utilisateur non trouvé');
           }
 
-          console.log("[NextAuth] User found, verifying password");
-
           // Vérifier si le mot de passe est correct
           const isPasswordValid = await bcrypt.compare(
-            credentials.password,
+            credentials.password.trim(),
             user.password
           );
 
           if (!isPasswordValid) {
-            console.log("[NextAuth] Invalid password");
             throw new Error('Mot de passe incorrect');
           }
-
-          console.log("[NextAuth] Authentication successful for user:", user.username);
 
           // Retourner les informations de l'utilisateur
           return {
@@ -81,7 +71,7 @@ export const authOptions: AuthOptions = {
             roleId: user.roleId
           };
         } catch (error) {
-          console.error("[NextAuth] Error during authentication:", error);
+          console.error("Authentication error:", error);
           if (error instanceof Error) {
             throw new Error(error.message);
           }
