@@ -164,12 +164,25 @@ export const authOptions: AuthOptions = {
     },
 
     async redirect({ url, baseUrl }) {
+      console.log("Redirect callback - URL:", url);
+      console.log("Redirect callback - BaseURL:", baseUrl);
+      
+      // Si l'URL est relative, l'ajouter à la base URL
       if (url.startsWith("/")) {
-        return `${baseUrl}${url}`;
-      } else if (new URL(url).origin === baseUrl) {
+        const finalUrl = `${baseUrl}${url}`;
+        console.log("Redirecting to:", finalUrl);
+        return finalUrl;
+      }
+      
+      // Si l'URL est sur le même domaine, l'autoriser
+      if (new URL(url).origin === baseUrl) {
+        console.log("Redirecting to same domain:", url);
         return url;
       }
-      return baseUrl;
+      
+      // Par défaut, rediriger vers le dashboard
+      console.log("Redirecting to default:", `${baseUrl}/dashboard`);
+      return `${baseUrl}/dashboard`;
     },
   },
 

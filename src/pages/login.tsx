@@ -24,12 +24,14 @@ function Login() {
 
   useEffect(() => {
     if (status === "authenticated") {
+      console.log("User is authenticated, redirecting to:", callbackUrl);
       router.replace(callbackUrl);
     }
   }, [status, router, callbackUrl]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      console.log("Attempting to sign in...");
       const res = await signIn("credentials", {
         redirect: false,
         username: data.username,
@@ -37,12 +39,17 @@ function Login() {
         callbackUrl: callbackUrl
       });
 
+      console.log("Sign in response:", res);
+
       if (res?.error) {
+        console.error("Sign in error:", res.error);
         toast.error(res.error);
       } else if (res?.ok) {
+        console.log("Sign in successful, redirecting to:", callbackUrl);
         router.replace(callbackUrl);
       }
     } catch (error) {
+      console.error("Sign in error:", error);
       toast.error("Une erreur est survenue lors de la connexion");
     }
   };
