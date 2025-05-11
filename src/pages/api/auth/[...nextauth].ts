@@ -97,50 +97,32 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user, account }) {
-      console.log("[NextAuth] JWT Callback - Token:", token);
-      console.log("[NextAuth] JWT Callback - User:", user);
-      
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;
         token.roleId = user.roleId;
-        console.log("[NextAuth] JWT Callback - Updated token:", token);
       }
       return token;
     },
 
     async session({ session, token }) {
-      console.log("[NextAuth] Session Callback - Session:", session);
-      console.log("[NextAuth] Session Callback - Token:", token);
-      
       if (token) {
         session.user = {
           id: token.id,
           username: token.username,
           roleId: token.roleId
         };
-        console.log("[NextAuth] Session Callback - Updated session:", session);
       }
       return session;
     },
 
     async redirect({ url, baseUrl }) {
-      console.log("[NextAuth] Redirect Callback - URL:", url);
-      console.log("[NextAuth] Redirect Callback - BaseURL:", baseUrl);
-      
-      // Permettre les redirections vers des URLs relatives
       if (url.startsWith("/")) {
-        const finalUrl = `${baseUrl}${url}`;
-        console.log("[NextAuth] Redirect Callback - Final URL:", finalUrl);
-        return finalUrl;
-      }
-      // Permettre les redirections vers le même domaine
-      else if (new URL(url).origin === baseUrl) {
-        console.log("[NextAuth] Redirect Callback - Same domain URL:", url);
+        return `${baseUrl}${url}`;
+      } else if (new URL(url).origin === baseUrl) {
         return url;
       }
-      console.log("[NextAuth] Redirect Callback - Default to baseUrl:", baseUrl);
       return baseUrl;
     },
   },
@@ -151,20 +133,7 @@ export const authOptions: AuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true, // Activer le mode debug en production
-
-  cookies: {
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        domain: '.vercel.app',
-      },
-    },
-  },
+  debug: process.env.NODE_ENV === 'development',
 };
 
 export default NextAuth(authOptions);

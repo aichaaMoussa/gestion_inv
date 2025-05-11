@@ -3,6 +3,8 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
+import Image from "next/image";
+import { Loader } from "lucide-react";
 
 interface LoginFormData {
   username: string;
@@ -56,7 +58,14 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
+        <div className="flex flex-col items-center">
+          <Image
+            src="/logors.png"
+            alt="Logo"
+            width={80}
+            height={80}
+            className="mx-auto h-24 object-contain"
+          />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Connexion
           </h2>
@@ -101,7 +110,11 @@ function Login() {
               disabled={isSubmitting}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              {isSubmitting ? "Connexion en cours..." : "Se connecter"}
+              {isSubmitting ? (
+                <Loader className="animate-spin text-white" size={20} />
+              ) : (
+                "Se connecter"
+              )}
             </button>
           </div>
         </form>
