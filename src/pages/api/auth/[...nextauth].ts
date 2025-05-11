@@ -39,11 +39,16 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         try {
+          console.log("Starting authentication process...");
+          
           if (!credentials?.username || !credentials?.password) {
+            console.log("Missing credentials");
             throw new Error('Veuillez remplir tous les champs');
           }
 
+          console.log("Connecting to database...");
           const db = await connectToDb();
+          console.log("Database connected successfully");
           
           // Vérifier si l'utilisateur existe
           const user = await db.collection("users").findOne({ 
@@ -51,8 +56,12 @@ export const authOptions: AuthOptions = {
           });
 
           if (!user) {
+            console.log("User not found:", credentials.username);
             throw new Error('Utilisateur non trouvé');
           }
+
+          console.log("User found, stored password hash:", user.password);
+          console.log("Attempting to verify password...");
 
           // Vérifier si le mot de passe est correct
           const isPasswordValid = await bcrypt.compare(
@@ -60,18 +69,31 @@ export const authOptions: AuthOptions = {
             user.password
           );
 
+          console.log("Password verification result:", isPasswordValid);
+
           if (!isPasswordValid) {
+            console.log("Invalid password for user:", credentials.username);
             throw new Error('Mot de passe incorrect');
           }
 
+          console.log("Authentication successful for user:", user.username);
+
           // Retourner les informations de l'utilisateur
-          return {
+          const userData = {
             id: user._id.toString(),
             username: user.username,
             roleId: user.roleId
           };
+          
+          console.log("Returning user data:", userData);
+          return userData;
+
         } catch (error) {
-          console.error("Authentication error:", error);
+          console.error("Authentication error details:", {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+          });
+          
           if (error instanceof Error) {
             throw new Error(error.message);
           }
@@ -123,7 +145,7 @@ export const authOptions: AuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Enable debug mode to see more detailed logs
 };
 
 export default NextAuth(authOptions);
