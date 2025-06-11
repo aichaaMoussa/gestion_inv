@@ -36,6 +36,7 @@ handler
   })
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
     const { body: data } = req;
+    console.log(data);
 
     if (!userShemas.safeParse(data).success) {
       return res.status(400).json({ message: "Invalid data" });
@@ -44,6 +45,22 @@ handler
     try {
       const date = new Date();
       const db = await connectToDb();
+
+      // Vérifier si le NNI existe déjà
+      if (data.nni) {
+        const existingUserWithNNI = await db.collection("users").findOne({ nni: data.nni });
+        if (existingUserWithNNI) {
+          return res.status(400).json({ message: "Un utilisateur avec ce NNI existe déjà" });
+        }
+      }
+
+      // Vérifier si le numéro de téléphone existe déjà
+      if (data.phone) {
+        const existingUserWithPhone = await db.collection("users").findOne({ phone: data.phone });
+        if (existingUserWithPhone) {
+          return res.status(400).json({ message: "Un utilisateur avec ce numéro de téléphone existe déjà" });
+        }
+      }
 
       if (data?.roleId) data.roleId = new ObjectId(data?.roleId);
 

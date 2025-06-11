@@ -56,13 +56,27 @@ export default function App() {
     mutationFn: async (data: FormData) => {
       return axios.post("/api/user", data);
     },
-    onSuccess: () => {
-      push("/dashboard/user");
-      toast.success("Utilisateur créé avec succès !");
+    onSuccess: (response) => {
+      if (response.status === 201) {
+        toast.success("Utilisateur créé avec succès !");
+        push("/dashboard/user");
+      }
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       console.error("Erreur lors de la création de l'utilisateur :", error);
-      toast.error("Échec de la création de l'utilisateur. Veuillez réessayer.");
+      const status = error.response?.status;
+      const errorMessage = error.response?.data?.message || "Échec de la création de l'utilisateur. Veuillez réessayer.";
+
+      switch (status) {
+        case 400:
+          toast.warning(errorMessage);
+          break;
+        case 500:
+          toast.error("Une erreur serveur est survenue. Veuillez réessayer plus tard.");
+          break;
+        default:
+          toast.error(errorMessage);
+      }
     },
   });
 

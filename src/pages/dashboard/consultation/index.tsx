@@ -19,7 +19,7 @@ import {
   InputAdornment,
   CircularProgress,
 } from '@mui/material';
-import { Search as SearchIcon, Print as PrintIcon, Visibility as VisibilityIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Print as PrintIcon, Visibility as VisibilityIcon, Edit as EditIcon, Add as AddIcon } from '@mui/icons-material';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -151,9 +151,19 @@ const ConsultationPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Gestion des Consultations
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4">
+          Gestion des Consultations
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => router.push('/dashboard/consultation/add')}
+        >
+          Ajouter une consultation
+        </Button>
+      </Box>
 
       <TextField
         fullWidth
