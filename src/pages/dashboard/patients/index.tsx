@@ -74,6 +74,11 @@ const TablePage = () => {
         accessor: "_id",
         Cell: ({ row }: { row: { original: Patient } }) => (
           <div className="flex space-x-2">
+            <Link href={`/dashboard/patients/${row.original._id?.toString() || ""}`}>
+              <button className="text-blue-500 hover:text-blue-600">
+                Dossier
+              </button>
+            </Link>
             <Link
               href={`/dashboard/patients/add/${row.original._id?.toString() || ""}`}
             >

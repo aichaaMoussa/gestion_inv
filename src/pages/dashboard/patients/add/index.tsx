@@ -35,21 +35,48 @@ export default function App() {
     resolver: zodResolver(PatientSchema)
   });
   const { push } = useRouter();
+  // const { mutate } = useMutation({
+  //   mutationKey: ["patient"],
+  //   mutationFn: async (data: PatientFormData) => {
+  //     return axios.post("/api/patients", data);
+  //   },
+  //   onSuccess: () => {
+  //     push("/dashboard/patients");
+  //     toast.success("Patient créé avec succès !");
+  //   },
+  //   onError: (error: unknown) => {
+  //     console.error("Erreur lors de la création de patient :", error);
+  //     toast.error("Échec de la création de patient. Veuillez réessayer.");
+  //   },
+  // });
   const { mutate } = useMutation({
     mutationKey: ["patient"],
     mutationFn: async (data: PatientFormData) => {
       return axios.post("/api/patients", data);
     },
-    onSuccess: () => {
-      push("/dashboard/patients");
-      toast.success("Patient créé avec succès !");
+    onSuccess: (response) => {
+      if (response.status === 201) {
+        toast.success("Patient créé avec succès !");
+        push("/dashboard/patients");
+      }
     },
-    onError: (error: unknown) => {
-      console.error("Erreur lors de la création de patient :", error);
-      toast.error("Échec de la création de patient. Veuillez réessayer.");
+    onError: (error: any) => {
+      console.error("Erreur lors de la création de l'utilisateur :", error);
+      const status = error.response?.status;
+      const errorMessage = error.response?.data?.message || "Échec de la création de patient. Veuillez réessayer.";
+
+      switch (status) {
+        case 400:
+          toast.warning(errorMessage);
+          break;
+        case 500:
+          toast.error("Une erreur serveur est survenue. Veuillez réessayer plus tard.");
+          break;
+        default:
+          toast.error(errorMessage);
+      }
     },
   });
-
   const onSubmit = (data: PatientFormData) => {
     console.log("Form data submitted:", data);
     mutate(data);

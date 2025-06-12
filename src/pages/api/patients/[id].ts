@@ -9,22 +9,25 @@ const handler = nextConnect();
 handler
   .get(async (req: NextApiRequest, res: NextApiResponse) => {
     const { id } = req.query;
+
     if (!id) {
-      return res.status(400).json({ error: "Invalid ID" });
+      return res.status(400).json({ message: "ID du patient non fourni" });
     }
+
     try {
       const db = await connectToDb();
+      const patientId = new ObjectId(id as string);
 
-      const patients = await db
-        .collection("patients")
-        .findOne({ _id: new ObjectId(id as string) });
-      if (!patients) {
-        return res.status(404).json({ error: "patient not fond" });
+      const patient = await db.collection("patients").findOne({ _id: patientId });
+
+      if (!patient) {
+        return res.status(404).json({ message: "Patient non trouvé" });
       }
-      res.json(patients);
-    } catch (error: unknown) {
+
+      res.status(200).json(patient);
+    } catch (error: any) {
       console.error("Erreur API :", error);
-      res.status(500).json({ statusCode: 500, message: error instanceof Error ? error.message : 'An error occurred' });
+      res.status(500).json({ statusCode: 500, message: error.message });
     }
   })
   .put(async (req: NextApiRequest, res: NextApiResponse) => {

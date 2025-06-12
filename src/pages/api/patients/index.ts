@@ -67,7 +67,20 @@ handler
       const db = await connectToDb();
       const date = new Date();
       const doctorId = new ObjectId(data.doctorId);
+      if (data.nni) {
+        const existingUserWithNNI = await db.collection("patients").findOne({ nni: data.nni });
+        if (existingUserWithNNI) {
+          return res.status(400).json({ message: "Un patient avec ce NNI existe déjà" });
+        }
+      }
 
+      // Vérifier si le numéro de téléphone existe déjà
+      if (data.telephone) {
+        const existingUserWithPhone = await db.collection("patients").findOne({ phone: data.phone });
+        if (existingUserWithPhone) {
+          return res.status(400).json({ message: "Un patient avec ce numéro de téléphone existe déjà" });
+        }
+      }
       console.log("Insertion en base avec doctorId :", doctorId);
 
       await db.collection("patients").insertOne({
